@@ -93,11 +93,13 @@ Titles mentioning software, algorithms and error correction should be rated high
 <Input>
 1234.56789, Quantum Error Correction For Dummies.
 4567.45678, Fast quantum search algorithm modelling on conventional computers: Information analysis of termination problem.
+4566.32262, A pedagogical revisit on the hydrogen atom induced by a uniform static electric field
 
 <Output>
 [
     {"Id": "1234.56789", "R": 5},
-    {"Id": "4567.45678", "R": 4}
+    {"Id": "4567.45678", "R": 4},
+    {"Id": "4566.32262", "R": 1}
 ]
 
 <Input>
@@ -114,7 +116,8 @@ Titles mentioning software, algorithms and error correction should be rated high
     var preferredChoice = completionsResponse.Value.Choices[0];
     var rawJsonResponse = preferredChoice.Text.Trim();
 
-    Console.WriteLine("Raw JSON response: " + rawJsonResponse);
+    // debug only
+    // Console.WriteLine("Raw JSON response: " + rawJsonResponse);
 
     var results = JsonSerializer.Deserialize<RatedArticleResponse[]>(rawJsonResponse);
 
