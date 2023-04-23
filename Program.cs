@@ -42,8 +42,10 @@ feedItems = feedItems.OrderByDescending(x => x.Rating).ToList();
 WriteOutItems(feedItems);
 
 void WriteOutItems(IList<FeedItem> feedItems) {
-    var table = new Table();
-    table.Border = TableBorder.HeavyHead;
+    var table = new Table
+    {
+        Border = TableBorder.HeavyHead
+    };
 
     // Add some columns
     table.AddColumn(new TableColumn("Rating").Centered());
