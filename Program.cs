@@ -4,58 +4,97 @@ using Azure;
 using Azure.AI.OpenAI;
 using Spectre.Console;
 
+var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
+
 var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT");
 var azureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
 var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME");
 
-var feedItems = new List<FeedItem>();
-var feedUrl = "https://export.arxiv.org/rss/quant-ph";
+var feedUrl = $"http://export.arxiv.org/api/query?search_query=cat:quant-ph+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending";
 var httpClient = new HttpClient();
 var httpResponse = await httpClient.GetAsync(feedUrl);
 
+Feed feed = null;
 if (httpResponse.IsSuccessStatusCode)
 {
+    var ns = XNamespace.Get("http://www.w3.org/2005/Atom");
+    var opensearch = XNamespace.Get("http://a9.com/-/spec/opensearch/1.1/");
+    var arxiv = XNamespace.Get("http://arxiv.org/schemas/atom");
+
     var xmlContent = await httpResponse.Content.ReadAsStringAsync();
     var xDoc = XDocument.Parse(xmlContent);
-    var defaultNs = xDoc.Root.GetDefaultNamespace();
-    var items = xDoc.Root.Descendants().Where(x => x.Name.LocalName == "item");
-    feedItems = items.Select(x => new FeedItem(x, defaultNs)).ToList();
+    var feedElement = xDoc.Element(ns + "feed");
+
+    feed = new Feed
+    {
+        Title = (string)feedElement.Element(ns + "title"),
+        Id = (string)feedElement.Element(ns + "id"),
+        Updated = (DateTime)feedElement.Element(ns + "updated"),
+        TotalResults = (int)feedElement.Element(opensearch + "totalResults"),
+        StartIndex = (int)feedElement.Element(opensearch + "startIndex"),
+        ItemsPerPage = (int)feedElement.Element(opensearch + "itemsPerPage"),
+        Entries = feedElement.Elements(ns + "entry").Select(entryElement => new Entry
+        {
+            Id = ((string)entryElement.Element(ns + "id")).Split("/").Last(),
+            Updated = (DateTime)entryElement.Element(ns + "updated"),
+            Published = (DateTime)entryElement.Element(ns + "published"),
+            Title = (string)entryElement.Element(ns + "title"),
+            Summary = (string)entryElement.Element(ns + "summary"),
+            Authors = entryElement.Elements(ns + "author").Select(authorElement => new Author
+            {
+                Name = (string)authorElement.Element(ns + "name")
+            }).ToList(),
+            PdfLink = entryElement.Elements(ns + "link").FirstOrDefault(link => (string)link.Attribute("title") == "pdf")?.Attribute("href")?.Value,
+            PrimaryCategory = (string)entryElement.Element(arxiv + "primary_category")?.Attribute("term")?.Value,
+            Categories = entryElement.Elements(ns + "category").Select(category => (string)category.Attribute("term")).ToList()
+        }).ToList()
+    };
 }
-else
+
+if (feed == null) 
 {
     Console.WriteLine("Failed to load the feed.");
     return;
 }
 
-var results = await GetAIRatings(azureOpenAiDeploymentName, feedItems);
+var results = await GetAIRatings(azureOpenAiDeploymentName, feed);
 
 foreach (var rated in results) 
 {
-    var feedItem = feedItems.FirstOrDefault(x => x.Id == rated.Id);
-    if (feedItem != null)
+    var existingEntry = feed.Entries.FirstOrDefault(x => x.Id == rated.Id);
+    if (existingEntry != null)
     {
-        feedItem.Rating = rated.R;
+        existingEntry.Rating = rated.R;
     }
 }
 
-feedItems = feedItems.OrderByDescending(x => x.Rating).ToList();
-WriteOutItems(feedItems);
+feed.Entries = feed.Entries.OrderByDescending(x => x.Rating).ToList();
+WriteOutItems(feed);
 
-void WriteOutItems(IList<FeedItem> feedItems) {
+void WriteOutItems(Feed feed) 
+{
+    if (feed.Entries.Count == 0) 
+    {
+        Console.WriteLine("No items today...");
+        return;
+    }
+
     var table = new Table
     {
         Border = TableBorder.HeavyHead
     };
 
     table.AddColumn(new TableColumn("Rating").Centered());
+    table.AddColumn("Updated");
     table.AddColumn("Title");
+    table.AddColumn("Authors");
     table.AddColumn("Link");
 
     table.Columns[1].Padding(0, 10);
 
-    foreach (var feedItem in feedItems)
+    foreach (var entry in feed.Entries)
     {
-        var color = feedItem.Rating switch
+        var color = entry.Rating switch
         {
             1 => "red",
             2 => "yellow",
@@ -64,13 +103,19 @@ void WriteOutItems(IList<FeedItem> feedItems) {
             5 => "green",
             _ => "white"
         };
-        table.AddRow($"[{color}]{Markup.Escape(feedItem.Rating.ToString())}[/]", Markup.Escape(feedItem.Title), $"[link={feedItem.Link}]{feedItem.Id}[/]");
+        table.AddRow(
+            $"[{color}]{Markup.Escape(entry.Rating.ToString())}[/]", 
+            $"[{color}]{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}[/]", 
+            $"[{color}]{Markup.Escape(entry.Title)}[/]", 
+            $"[{color}]{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}[/]",
+            $"[link={entry.PdfLink} {color}]{entry.Id}[/]"
+        );
     }
 
     AnsiConsole.Write(table);
 }
 
-async Task<RatedArticleResponse[]> GetAIRatings(string azureOpenAiDeploymentName, IList<FeedItem> feedItems)
+async Task<RatedArticleResponse[]> GetAIRatings(string azureOpenAiDeploymentName, Feed feed)
 {
     var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
 
@@ -84,7 +129,7 @@ async Task<RatedArticleResponse[]> GetAIRatings(string azureOpenAiDeploymentName
         GenerationSampleCount = 1,
     };
 
-    var input = string.Join("\n", feedItems.Select(x => x.Id + ", " + x.Title));
+    var input = string.Join("\n", feed.Entries.Select(x => x.Id + ", " + x.Title));
 
     completionsOptions.Prompts.Add(
     """
