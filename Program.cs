@@ -47,7 +47,6 @@ void WriteOutItems(IList<FeedItem> feedItems) {
         Border = TableBorder.HeavyHead
     };
 
-    // Add some columns
     table.AddColumn(new TableColumn("Rating").Centered());
     table.AddColumn("Title");
     table.AddColumn("Link");
