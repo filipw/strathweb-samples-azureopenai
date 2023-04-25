@@ -6,10 +6,6 @@ using Spectre.Console;
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT");
-var azureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME");
-
 var feedUrl = $"http://export.arxiv.org/api/query?search_query=cat:quant-ph+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending";
 var httpClient = new HttpClient();
 var httpResponse = await httpClient.GetAsync(feedUrl);
@@ -57,7 +53,7 @@ if (feed == null)
     return;
 }
 
-var results = await GetAIRatings(azureOpenAiDeploymentName, feed);
+var results = await GetAIRatings(feed);
 
 foreach (var rated in results) 
 {
@@ -115,8 +111,12 @@ void WriteOutItems(Feed feed)
     AnsiConsole.Write(table);
 }
 
-async Task<RatedArticleResponse[]> GetAIRatings(string azureOpenAiDeploymentName, Feed feed)
+async Task<RatedArticleResponse[]> GetAIRatings(Feed feed)
 {
+    var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT");
+    var azureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+    var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME");
+
     var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
 
     var completionsOptions = new CompletionsOptions()
