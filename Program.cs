@@ -64,7 +64,7 @@ foreach (var rated in results)
     }
 }
 
-feed.Entries = feed.Entries.OrderByDescending(x => x.Rating).ToList();
+feed.Entries = feed.Entries.OrderByDescending(x => x.Rating).ThenByDescending(x => x.Updated).ToList();
 WriteOutItems(feed);
 
 void WriteOutItems(Feed feed) 
@@ -86,17 +86,13 @@ void WriteOutItems(Feed feed)
     table.AddColumn("Authors");
     table.AddColumn("Link");
 
-    table.Columns[1].Padding(0, 10);
-
     foreach (var entry in feed.Entries)
     {
         var color = entry.Rating switch
         {
             1 => "red",
-            2 => "yellow",
-            3 => "yellow",
-            4 => "green",
-            5 => "green",
+            2 or 3 => "yellow",
+            4 or 5 => "green",
             _ => "white"
         };
         table.AddRow(
@@ -104,7 +100,7 @@ void WriteOutItems(Feed feed)
             $"[{color}]{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}[/]", 
             $"[{color}]{Markup.Escape(entry.Title)}[/]", 
             $"[{color}]{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}[/]",
-            $"[link={entry.PdfLink} {color}]{entry.Id}[/]"
+            $"[link={entry.PdfLink} {color}]{entry.PdfLink}[/]"
         );
     }
 
@@ -122,7 +118,7 @@ async Task<RatedArticleResponse[]> GetAIRatings(Feed feed)
     var completionsOptions = new CompletionsOptions()
     {
         Temperature = 0,
-        MaxTokens = 2000,
+        MaxTokens = 2400,
         NucleusSamplingFactor = 1,
         FrequencyPenalty = 0,
         PresencePenalty = 0,
@@ -134,18 +130,20 @@ async Task<RatedArticleResponse[]> GetAIRatings(Feed feed)
     completionsOptions.Prompts.Add(
     """
 Rate on a scale of 1-5 how relevant each headline is to quantum computing software engineers. 
-Titles mentioning software, algorithms and error correction should be rated highly. Quantum computing hardware topics should be rated lower. Other quantum physics topics should get low rating. Produce result in JSON format as specified in the output example.
+Titles mentioning quantum frameworks, software, algorithms, machine learning and error correction should be rated highly. Quantum computing hardware topics should be rated lower. Other quantum physics topics should get low rating. Produce JSON result as specified in the output example.
 
 <Input>
-1234.56789, Quantum Error Correction For Dummies.
-4567.45678, Fast quantum search algorithm modelling on conventional computers: Information analysis of termination problem.
-4566.32262, A pedagogical revisit on the hydrogen atom induced by a uniform static electric field
+1, Quantum Error Correction For Dummies.
+2, Quantum Algorithm for Unsupervised Anomaly Detection
+3, Fast quantum search algorithm modelling on conventional computers: Information analysis of termination problem.
+4, A pedagogical revisit on the hydrogen atom induced by a uniform static electric field
 
 <Output>
 [
-    {"Id": "1234.56789", "R": 5},
-    {"Id": "4567.45678", "R": 4},
-    {"Id": "4566.32262", "R": 1}
+    {"Id": "1", "R": 5},
+    {"Id": "2", "R": 5},
+    {"Id": "3", "R": 4},
+    {"Id": "4", "R": 1}
 ]
 
 <Input>
