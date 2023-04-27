@@ -6,7 +6,8 @@ using Spectre.Console;
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var feedUrl = $"http://export.arxiv.org/api/query?search_query=cat:quant-ph+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results=100&sortBy=submittedDate&sortOrder=descending";
+// cap at 40 results
+var feedUrl = $"http://export.arxiv.org/api/query?search_query=cat:quant-ph+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results=40&sortBy=submittedDate&sortOrder=descending";
 var httpClient = new HttpClient();
 var httpResponse = await httpClient.GetAsync(feedUrl);
 
@@ -31,7 +32,7 @@ if (httpResponse.IsSuccessStatusCode)
         ItemsPerPage = (int)feedElement.Element(opensearch + "itemsPerPage"),
         Entries = feedElement.Elements(ns + "entry").Select(entryElement => new Entry
         {
-            Id = ((string)entryElement.Element(ns + "id")).Split("/").Last(),
+            Id = ((string)entryElement.Element(ns + "id")).Split(".").Last()[..^2],
             Updated = (DateTime)entryElement.Element(ns + "updated"),
             Published = (DateTime)entryElement.Element(ns + "published"),
             Title = (string)entryElement.Element(ns + "title"),
@@ -149,6 +150,9 @@ Titles mentioning quantum frameworks, software, algorithms, machine learning and
 <Input>
 """ + "\n" + input + "\n" + "<Output>"
     );
+
+    // debug only
+    // Console.WriteLine("Raw input: " + completionsOptions.Prompts[0]);
 
     var completionsResponse = await client.GetCompletionsAsync(azureOpenAiDeploymentName, completionsOptions);
     if (completionsResponse.Value.Choices.Count == 0)
