@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.Embeddings", "src\Strathweb.Samples.AzureOpenAI.Embeddings\Strathweb.Samples.AzureOpenAI.Embeddings.csproj", "{52B835F4-3C63-44B5-98BE-8A0207EC498D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.Shared", "src\Strathweb.Samples.AzureOpenAI.Shared\Strathweb.Samples.AzureOpenAI.Shared.csproj", "{CC0E8BCA-24BA-442F-82DC-A3B98C734202}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +28,14 @@ Global
 		{52B835F4-3C63-44B5-98BE-8A0207EC498D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52B835F4-3C63-44B5-98BE-8A0207EC498D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52B835F4-3C63-44B5-98BE-8A0207EC498D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC0E8BCA-24BA-442F-82DC-A3B98C734202}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC0E8BCA-24BA-442F-82DC-A3B98C734202}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC0E8BCA-24BA-442F-82DC-A3B98C734202}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC0E8BCA-24BA-442F-82DC-A3B98C734202}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73D06A9F-932F-40E9-83E0-0B086A8787A8} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{52B835F4-3C63-44B5-98BE-8A0207EC498D} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
+		{CC0E8BCA-24BA-442F-82DC-A3B98C734202} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 	EndGlobalSection
 EndGlobal
