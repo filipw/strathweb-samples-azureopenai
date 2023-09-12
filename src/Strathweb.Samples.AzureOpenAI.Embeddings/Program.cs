@@ -24,19 +24,17 @@ var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyC
 
 var liked =
     """
-A pragma based C++ framework for hybrid quantum/classical computation
+Optimal Qubit Reuse for Near-Term Quantum Computers
 
-  Quantum computers promise exponential speed ups over classical computers for
-various tasks. This emerging technology is expected to have its first huge
-impact in High Performance Computing (HPC), as it can solve problems beyond the
-reach of HPC. To that end, HPC will require quantum accelerators, which will
-enable applications to run on both classical and quantum devices, via hybrid
-quantum-classical nodes. Hybrid quantum-HPC applications should be scalable,
-executable on Quantum Error Corrected (QEC) devices, and could use
-quantum-classical primitives. However, the lack of scalability, poor
-performances, and inability to insert classical schemes within quantum
-applications has prevented current quantum frameworks from being adopted by the
-HPC community.
+Near-term quantum computations are limited by high error rates, the scarcity of qubits and low qubit connectivity. 
+Increasing support for mid-circuit measurements and qubit reset in near-term quantum computers enables qubit reuse that may yield quantum computations with fewer qubits and lower errors. 
+In this work, we introduce a formal model for qubit reuse optimization that delivers provably optimal solutions with respect to quantum circuit depth, number of qubits, or number of swap gates for the first time. 
+This is in contrast to related work where qubit reuse is used heuristically or optimally but without consideration of the mapping effort. 
+We further investigate reset errors on near-term quantum computers by performing reset error characterization experiments. 
+Using the hereby obtained reset error characterization and calibration data of a near-term quantum computer, we then determine a qubit assignment that is optimal with respect to a given cost function. 
+We define this cost function to include gate errors and decoherence as well as the individual reset error of each qubit. 
+We found the reset fidelity to be state-dependent and to range, depending on the reset qubit, from 67.5% to 100% in a near-term quantum computer. 
+We demonstrate the applicability of the developed method to a number of quantum circuits and show improvements in the number of qubits and swap gate insertions, estimated success probability, and Hellinger fidelity of the investigated quantum circuits.
 """;
 
 var likedEmbedding = await client.GetEmbeddingsAsync(azureOpenAiDeploymentName, 
