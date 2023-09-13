@@ -22,7 +22,7 @@ if (feed == null)
 
 var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
 
-var liked =
+var baseline =
     """
 Optimal Qubit Reuse for Near-Term Quantum Computers
 
@@ -37,9 +37,9 @@ We found the reset fidelity to be state-dependent and to range, depending on the
 We demonstrate the applicability of the developed method to a number of quantum circuits and show improvements in the number of qubits and swap gate insertions, estimated success probability, and Hellinger fidelity of the investigated quantum circuits.
 """;
 
-var likedEmbedding = await client.GetEmbeddingsAsync(azureOpenAiDeploymentName, 
-    new EmbeddingsOptions(liked));
-var likedVector = likedEmbedding.Value.Data[0].Embedding.ToArray();
+var baselineEmbedding = await client.GetEmbeddingsAsync(azureOpenAiDeploymentName, 
+    new EmbeddingsOptions(baseline));
+var baselineVector = baselineEmbedding.Value.Data[0].Embedding.ToArray();
 
 var entriesWithEmbeddings = new List<EntryWithEmbeddingItem>();
 
@@ -49,7 +49,7 @@ foreach (var entry in feed.Entries)
         new EmbeddingsOptions(entry.Title + Environment.NewLine + Environment.NewLine + entry.Summary));
     
     var vector = embedding.Value.Data[0].Embedding.ToArray();
-    var similarity = vector.CosineSimilarity(likedVector);
+    var similarity = vector.CosineSimilarity(baselineVector);
     
     entriesWithEmbeddings.Add(new EntryWithEmbeddingItem
     {
