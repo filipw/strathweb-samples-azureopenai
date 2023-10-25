@@ -63,6 +63,7 @@ var body = new OpenAIRequest
                 FieldsMapping = new DataSourceFieldsMapping
                 {
                     ContentFields = new[] { "content" },
+                    UrlField = "blog_url",
                     TitleField = "metadata_storage_name",
                     FilepathField = "metadata_storage_path"
                 },
@@ -109,6 +110,14 @@ req.Headers.Add("api-key", azureOpenAiServiceKey);
 
 var completionsResponseMessage = await client.SendAsync(req);
 var rawResponse = await completionsResponseMessage.Content.ReadAsStringAsync();
+
+if (!completionsResponseMessage.IsSuccessStatusCode)
+{
+    Console.WriteLine("Unfortunately, there was an error retrieving the response!");
+    Console.WriteLine(rawResponse);
+    return;
+}
+
 var response = JsonSerializer.Deserialize<OpenAIResponse>(rawResponse, options);
 
 Console.WriteLine(response?.Choices[0].Messages.FirstOrDefault(x => x.Role == "assistant")?.Content);
@@ -121,8 +130,9 @@ if (toolRawResponse != null)
     {
         for (var i = 1; i <= toolResponse.Citations.Length; i++)
         {
-            Console.WriteLine($" -> [doc{i}] {toolResponse.Citations[i - 1].Title}");
-            Console.WriteLine($"    {Encoding.UTF8.GetString(Convert.FromBase64String(toolResponse.Citations[i - 1].FilePath))}");
+            var citation = toolResponse.Citations[i - 1];
+            Console.WriteLine($" -> [doc{i}] {citation.Title}");
+            Console.WriteLine($"    {citation.Url ?? citation.FilePath}");
         }
     }
 }
