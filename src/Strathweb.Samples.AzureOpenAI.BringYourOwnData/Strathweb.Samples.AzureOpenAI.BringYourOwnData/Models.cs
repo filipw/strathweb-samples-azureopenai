@@ -12,7 +12,9 @@ record OpenAIResponse
 record ResponseChoice
 {
     public int Index { get; set; }
-    public ResponseMessage[] Messages { get; set; }
+    [JsonPropertyName("finish_reason")]
+    public string FinishReason { get; set; }
+    public ResponseMessage Message { get; set; }
 }
 
 record ResponseMessage
@@ -20,9 +22,14 @@ record ResponseMessage
     public int Index { get; set; }
     public string Role { get; set; }
     public string Content { get; set; }
-    
     [JsonPropertyName("end_turn")]
     public bool EndTurn { get; set; }
+    public ResponseContext Context { get; set; }
+}
+
+record ResponseContext
+{
+    public ResponseMessage[] Messages { get; set; }
 }
 
 record OpenAICitationResponse
@@ -52,60 +59,42 @@ record CitationMetadata
 record OpenAIRequest
 {
     public float Temperature { get; set; }
-    
     [JsonPropertyName("max_tokens")]
     public int MaxTokens { get; set; }
-    
     [JsonPropertyName("top_p")]
     public float TopP { get; set; }
-    
     public OpenAIMessage[] Messages { get; set; }
-    
     public DataSource[] DataSources { get; set; }
 }
 
 record DataSource
 {
     public string Type { get; set; }
-    
     public DataSourceParameters Parameters { get; set; }
 }
 
 record DataSourceParameters
 {
     public string Endpoint { get; set; }
-    
     public string Key { get; set; }
-    
     public string IndexName { get; set; }
-    
     public bool InScope { get; set; }
-    
     public int TopNDocuments { get; set; }
-    
     public string QueryType { get; set; }
-    
     public string SemanticConfiguration { get; set; }
-    
     public string RoleInformation { get; set; }
-    
     public string EmbeddingEndpoint { get; set; }
-    
     public string EmbeddingKey { get; set; }
-    
     public DataSourceFieldsMapping FieldsMapping { get; set; }
 }
 
 record DataSourceFieldsMapping
 {
     public string[] VectorFields { get; set; }
-    
     public string[] ContentFields { get; set; }
     public string FilepathField { get; set; }
     public string UrlField { get; set; }
-    
     public string TitleField { get; set; }
-
 }
 
 record OpenAIMessage
