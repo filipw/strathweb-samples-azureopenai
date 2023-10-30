@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Azure;
+using Azure.AI.OpenAI;
 using Spectre.Console;
 
 var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
@@ -38,108 +40,224 @@ or has no clear answer, you will not respond to it but instead you will just rep
 """;
 var seedAssistantMessage = "I'm a Strathweb AI assistant! Ask me anything about the content from strathweb.com blog!";
 
-var client = new HttpClient();
+var demo = AnsiConsole.Prompt(
+    new SelectionPrompt<string>()
+        .Title("Choose the [green]example[/] to run?")
+        .AddChoices(new[]
+        {
+            "REST API", "SDK"
+        }));
+
+var options = new JsonSerializerOptions
+{
+    PropertyNameCaseInsensitive = true,
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+};
 
 AnsiConsole.MarkupLine($":robot: {seedAssistantMessage}");
 
-while (true)
+switch (demo)
 {
-    var prompt = Console.ReadLine();
-    var req = new HttpRequestMessage(HttpMethod.Post,
-        $"{azureOpenAiServiceEndpoint}openai/deployments/{azureOpenAiDeploymentName}/extensions/chat/completions?api-version=2023-08-01-preview");
+    case "REST API":
+        await RunWithRestApi();
+        break;
+    case "SDK":
+        await RunWithSdk();
+        break;
+    default:
+        Console.WriteLine("Nothing selected!");
+        break;
+}
 
-    var body = new OpenAIRequest
+async Task RunWithRestApi()
+{
+    var client = new HttpClient();
+
+    while (true)
     {
-        Temperature = 1,
-        MaxTokens = 400,
-        TopP = 1,
-        DataSources = new[]
+        var prompt = Console.ReadLine();
+        var req = new HttpRequestMessage(HttpMethod.Post,
+            $"{azureOpenAiServiceEndpoint}openai/deployments/{azureOpenAiDeploymentName}/extensions/chat/completions?api-version=2023-08-01-preview");
+
+        var body = new OpenAIRequest
         {
-            new DataSource
+            Temperature = 1,
+            MaxTokens = 400,
+            TopP = 1,
+            DataSources = new[]
             {
-                Type = "AzureCognitiveSearch",
-                Parameters = new DataSourceParameters()
+                new DataSource
                 {
-                    Endpoint = $"https://{azureSearchService}.search.windows.net",
-                    Key = azureSearchKey,
-                    IndexName = azureSearchIndex,
-                    FieldsMapping = new DataSourceFieldsMapping
+                    Type = "AzureCognitiveSearch",
+                    Parameters = new DataSourceParameters()
                     {
-                        ContentFields = new[] { "content" },
-                        UrlField = "blog_url",
-                        TitleField = "metadata_storage_name",
-                        FilepathField = "metadata_storage_path"
-                    },
-                    InScope = azureSearchEnableInDomain,
-                    TopNDocuments = azureSearchTopK,
-                    QueryType = azureSearchQueryType,
-                    SemanticConfiguration = azureSearchQueryType is "semantic" or "vectorSemanticHybrid"
-                        ? azureSearchSemanticSearchConfig
-                        : "",
-                    RoleInformation = seedSystemMessage
+                        Endpoint = $"https://{azureSearchService}.search.windows.net",
+                        Key = azureSearchKey,
+                        IndexName = azureSearchIndex,
+                        FieldsMapping = new DataSourceFieldsMapping
+                        {
+                            ContentFields = new[] { "content" },
+                            UrlField = "blog_url",
+                            TitleField = "metadata_storage_name",
+                            FilepathField = "metadata_storage_path"
+                        },
+                        InScope = azureSearchEnableInDomain,
+                        TopNDocuments = azureSearchTopK,
+                        QueryType = azureSearchQueryType,
+                        SemanticConfiguration = azureSearchQueryType is "semantic" or "vectorSemanticHybrid"
+                            ? azureSearchSemanticSearchConfig
+                            : "",
+                        RoleInformation = seedSystemMessage
+                    }
+                }
+            },
+            Messages = new[]
+            {
+                new OpenAIMessage
+                {
+                    Role = "system",
+                    Content = seedSystemMessage
+                },
+                new OpenAIMessage()
+                {
+                    Role = "assistant",
+                    Content = seedAssistantMessage
+                },
+                new OpenAIMessage
+                {
+                    Role = "user",
+                    Content = prompt
                 }
             }
-        },
-        Messages = new[]
+        };
+
+        var rawRequest = JsonSerializer.Serialize(body, options);
+        req.Content = new StringContent(rawRequest);
+        req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        req.Headers.Add("api-key", azureOpenAiServiceKey);
+
+        var completionsResponseMessage = await client.SendAsync(req);
+        var rawResponse = await completionsResponseMessage.Content.ReadAsStringAsync();
+        if (!completionsResponseMessage.IsSuccessStatusCode)
         {
-            new OpenAIMessage
+            AnsiConsole.Markup(":robot: ");
+            Console.Write("Unfortunately, there was an error retrieving the response!");
+            Console.WriteLine(rawResponse);
+            return;
+        }
+
+        var response = JsonSerializer.Deserialize<OpenAIResponse>(rawResponse, options);
+        var responseMessage = response?.Choices?.FirstOrDefault(x => x.Message.Role == "assistant")?.Message;
+
+        AnsiConsole.Markup(":robot: ");
+        Console.Write(responseMessage?.Content);
+        Console.Write(Environment.NewLine);
+
+        var toolRawResponse = responseMessage?.Context?.Messages?.FirstOrDefault(x => x.Role == "tool")?.Content;
+        if (toolRawResponse != null)
+        {
+            var toolResponse = JsonSerializer.Deserialize<OpenAICitationResponse>(toolRawResponse, options);
+            if (toolResponse != null && toolResponse.Citations.Any())
             {
-                Role = "system",
-                Content = seedSystemMessage
-            },
-            new OpenAIMessage()
-            {
-                Role = "assistant",
-                Content = seedAssistantMessage
-            },
-            new OpenAIMessage
-            {
-                Role = "user",
-                Content = prompt
+                var referencesContent = new StringBuilder();
+                referencesContent.AppendLine();
+
+                for (var i = 1; i <= toolResponse.Citations.Length; i++)
+                {
+                    var citation = toolResponse.Citations[i - 1];
+                    referencesContent.AppendLine($"  :page_facing_up: [[doc{i}]] {citation.Title}");
+                    referencesContent.AppendLine($"  :link: {citation.Url ?? citation.FilePath}");
+                }
+
+                var panel = new Panel(referencesContent.ToString())
+                {
+                    Header = new PanelHeader("References")
+                };
+                AnsiConsole.Write(panel);
             }
         }
-    };
-
-    var options = new JsonSerializerOptions
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    var rawRequest = JsonSerializer.Serialize(body, options);
-    req.Content = new StringContent(rawRequest);
-    req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-    req.Headers.Add("api-key", azureOpenAiServiceKey);
-
-    var completionsResponseMessage = await client.SendAsync(req);
-    var rawResponse = await completionsResponseMessage.Content.ReadAsStringAsync();
-    if (!completionsResponseMessage.IsSuccessStatusCode)
-    {
-        AnsiConsole.Markup(":robot: ");
-        Console.Write("Unfortunately, there was an error retrieving the response!");
-        Console.WriteLine(rawResponse);
-        return;
     }
+}
 
-    var response = JsonSerializer.Deserialize<OpenAIResponse>(rawResponse, options);
-    var responseMessage = response?.Choices?.FirstOrDefault(x => x.Message.Role == "assistant")?.Message;
-
-    AnsiConsole.Markup(":robot: ");
-    Console.Write(responseMessage?.Content);
-    Console.Write(Environment.NewLine);
-
-    var toolRawResponse = responseMessage?.Context?.Messages?.FirstOrDefault(x => x.Role == "tool")?.Content;
-    if (toolRawResponse != null)
+async Task RunWithSdk()
+{
+    while (true)
     {
-        var toolResponse = JsonSerializer.Deserialize<OpenAICitationResponse>(toolRawResponse, options);
-        if (toolResponse != null && toolResponse.Citations.Any())
+        var prompt = Console.ReadLine();
+        var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint),
+            new AzureKeyCredential(azureOpenAiServiceKey));
+        
+        var request = new ChatCompletionsOptions
         {
+            Temperature = 1,
+            MaxTokens = 400,
+            NucleusSamplingFactor = 1f,
+            Messages =
+            {
+                new ChatMessage(ChatRole.System, seedSystemMessage),
+                new ChatMessage(ChatRole.Assistant, seedAssistantMessage),
+                new ChatMessage(ChatRole.User, prompt)
+            },
+            AzureExtensionsOptions = new AzureChatExtensionsOptions
+            {
+                Extensions =
+                {
+                    new AzureCognitiveSearchChatExtensionConfiguration
+                    {
+                        ShouldRestrictResultScope = azureSearchEnableInDomain,
+                        SearchEndpoint = new Uri($"https://{azureSearchService}.search.windows.net"),
+                        SearchKey = new AzureKeyCredential(azureSearchKey),
+                        IndexName = azureSearchIndex,
+                        DocumentCount = azureSearchTopK,
+                        QueryType = AzureCognitiveSearchQueryType.Simple,
+                        SemanticConfiguration = azureSearchQueryType is "semantic" or "vectorSemanticHybrid"
+                            ? azureSearchSemanticSearchConfig
+                            : "",
+                        FieldMappingOptions = new AzureCognitiveSearchIndexFieldMappingOptions
+                        {
+                            ContentFieldNames = { "content" },
+                            UrlFieldName = "blog_url",
+                            TitleFieldName = "metadata_storage_name",
+                            FilepathFieldName = "metadata_storage_path"
+                        }
+                    }
+                }
+            }
+        };
+
+        var completionResponse =
+            await openAiClient.GetChatCompletionsStreamingAsync(azureOpenAiDeploymentName, request);
+
+        OpenAICitationResponse citationResponse = null;
+        await foreach (var choice in completionResponse.Value.GetChoicesStreaming())
+        {
+            await foreach (var message in choice.GetMessageStreaming())
+            {
+                if (message.AzureExtensionsContext != null)
+                {
+                    var extensionMessage = message.AzureExtensionsContext.Messages.FirstOrDefault();
+                    if (extensionMessage != null && !string.IsNullOrWhiteSpace(extensionMessage.Content))
+                    {
+                        citationResponse = JsonSerializer.Deserialize<OpenAICitationResponse>(extensionMessage.Content, options);
+                    }
+                }
+                else
+                {
+                    Console.Write(message.Content);
+                }
+            }
+        }
+        
+        
+        if (citationResponse != null && citationResponse.Citations.Any())
+        {
+            Console.WriteLine();
             var referencesContent = new StringBuilder();
             referencesContent.AppendLine();
 
-            for (var i = 1; i <= toolResponse.Citations.Length; i++)
+            for (var i = 1; i <= citationResponse.Citations.Length; i++)
             {
-                var citation = toolResponse.Citations[i - 1];
+                var citation = citationResponse.Citations[i - 1];
                 referencesContent.AppendLine($"  :page_facing_up: [[doc{i}]] {citation.Title}");
                 referencesContent.AppendLine($"  :link: {citation.Url ?? citation.FilePath}");
             }
