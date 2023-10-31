@@ -79,7 +79,7 @@ record DataSourceParameters
     public string Key { get; set; }
     public string IndexName { get; set; }
     public bool InScope { get; set; }
-    public int TopNDocuments { get; set; }
+    public uint TopNDocuments { get; set; }
     public string QueryType { get; set; }
     public string SemanticConfiguration { get; set; }
     public string RoleInformation { get; set; }
