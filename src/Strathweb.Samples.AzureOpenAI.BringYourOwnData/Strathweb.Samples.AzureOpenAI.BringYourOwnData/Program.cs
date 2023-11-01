@@ -1,9 +1,6 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Azure;
-using Azure.AI.OpenAI;
+﻿using System.Text.Json;
 using Spectre.Console;
+using Strathweb.Samples.AzureOpenAI.BringYourOwnData;
 using static Strathweb.Samples.AzureOpenAI.BringYourOwnData.Demo;
 
 var context = new AzureOpenAiContext
@@ -47,10 +44,7 @@ or has no clear answer, you will not respond to it but instead you will just rep
 var demo = AnsiConsole.Prompt(
     new SelectionPrompt<string>()
         .Title("Choose the [green]example[/] to run?")
-        .AddChoices(new[]
-        {
-            "REST API", "SDK"
-        }));
+        .AddChoices("REST API", "SDK"));
 
 var options = new JsonSerializerOptions
 {

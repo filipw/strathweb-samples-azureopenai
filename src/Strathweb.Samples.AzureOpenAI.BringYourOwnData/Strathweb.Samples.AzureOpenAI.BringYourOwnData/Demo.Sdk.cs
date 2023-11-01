@@ -17,8 +17,6 @@ static partial class Demo
         while (true)
         {
             var prompt = Console.ReadLine();
-
-
             var request = new ChatCompletionsOptions
             {
                 Temperature = 1,

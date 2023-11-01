@@ -1,3 +1,5 @@
+namespace Strathweb.Samples.AzureOpenAI.BringYourOwnData;
+
 public record AzureOpenAiContext
 {
     public string AzureOpenAiServiceEndpoint { get; init; }

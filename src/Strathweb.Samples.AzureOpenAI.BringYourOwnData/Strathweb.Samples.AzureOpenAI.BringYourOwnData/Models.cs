@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+namespace Strathweb.Samples.AzureOpenAI.BringYourOwnData;
+
 record OpenAIResponse
 {
     public string Id { get; set; }
