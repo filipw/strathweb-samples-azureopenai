@@ -37,16 +37,16 @@ We found the reset fidelity to be state-dependent and to range, depending on the
 We demonstrate the applicability of the developed method to a number of quantum circuits and show improvements in the number of qubits and swap gate insertions, estimated success probability, and Hellinger fidelity of the investigated quantum circuits.
 """;
 
-var baselineEmbedding = await client.GetEmbeddingsAsync(azureOpenAiDeploymentName, 
-    new EmbeddingsOptions(baseline));
+var baselineEmbedding = await client.GetEmbeddingsAsync(
+    new EmbeddingsOptions(azureOpenAiDeploymentName, new[] { baseline }));
 var baselineVector = baselineEmbedding.Value.Data[0].Embedding.ToArray();
 
 var entriesWithEmbeddings = new List<EntryWithEmbeddingItem>();
 
 foreach (var entry in feed.Entries)
 {
-    var embedding = await client.GetEmbeddingsAsync(azureOpenAiDeploymentName, 
-        new EmbeddingsOptions(entry.Title + Environment.NewLine + Environment.NewLine + entry.Summary));
+    var embedding = await client.GetEmbeddingsAsync( 
+        new EmbeddingsOptions(azureOpenAiDeploymentName,  new[] { entry.Title + Environment.NewLine + Environment.NewLine + entry.Summary }));
     
     var vector = embedding.Value.Data[0].Embedding.ToArray();
     var similarity = vector.CosineSimilarity(baselineVector);

@@ -76,8 +76,9 @@ async Task<RatedArticleResponse[]> GetAIRatings(Feed feed)
 
     var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
 
-    var completionsOptions = new CompletionsOptions()
+    var completionsOptions = new CompletionsOptions
     {
+        DeploymentName = azureOpenAiDeploymentName,
         Temperature = 0,
         MaxTokens = 2400,
         NucleusSamplingFactor = 1,
@@ -114,7 +115,7 @@ Titles mentioning quantum frameworks, software, algorithms, machine learning and
     // debug only
     // Console.WriteLine("Raw input: " + completionsOptions.Prompts[0]);
 
-    var completionsResponse = await client.GetCompletionsAsync(azureOpenAiDeploymentName, completionsOptions);
+    var completionsResponse = await client.GetCompletionsAsync(completionsOptions);
     if (completionsResponse.Value.Choices.Count == 0)
     {
         Console.WriteLine("No completions found.");
