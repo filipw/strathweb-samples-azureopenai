@@ -62,10 +62,4 @@ public record AzureOpenAiContext
     /// System-level prompt instructions for the OpenAI model
     /// </summary>
     public string SystemInstructions { get; init; }
-    
-    /// <summary>
-    /// The first message that is shown to the user, inviting the user
-    /// to engage in a conversation
-    /// </summary>
-    public string InitialAssistantMessage { get; init; }
 }

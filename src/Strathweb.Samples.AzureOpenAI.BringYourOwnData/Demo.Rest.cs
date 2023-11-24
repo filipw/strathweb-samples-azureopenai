@@ -56,11 +56,6 @@ static partial class Demo
                         Role = "system",
                         Content = context.SystemInstructions
                     },
-                    new OpenAIMessage()
-                    {
-                        Role = "assistant",
-                        Content = context.InitialAssistantMessage
-                    },
                     new OpenAIMessage
                     {
                         Role = "user",
@@ -69,8 +64,7 @@ static partial class Demo
                 }
             };
 
-            var rawRequest = JsonSerializer.Serialize(body, options);
-            req.Content = new StringContent(rawRequest);
+            req.Content = new StringContent(JsonSerializer.Serialize(body, options));
             req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             req.Headers.Add("api-key", context.AzureOpenAiServiceKey);
 
@@ -103,7 +97,9 @@ static partial class Demo
                     for (var i = 1; i <= toolResponse.Citations.Length; i++)
                     {
                         var citation = toolResponse.Citations[i - 1];
-                        referencesContent.AppendLine($"  :page_facing_up: [[doc{i}]] {citation.Title}");
+                        var citationId = $"[doc{i}]";
+                        if (!responseMessage.Content.Contains(citationId)) continue;
+                        referencesContent.AppendLine($"  :page_facing_up: [{citationId}] {citation.Title}");
                         referencesContent.AppendLine($"  :link: {citation.Url ?? citation.FilePath}");
                     }
 

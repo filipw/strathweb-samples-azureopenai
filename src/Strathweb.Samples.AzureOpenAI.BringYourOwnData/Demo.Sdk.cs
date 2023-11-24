@@ -40,7 +40,6 @@ static partial class Demo
             var prompt = Console.ReadLine();
             var request = new ChatCompletionsOptions(context.AzureOpenAiDeploymentName, new[] {
                 new ChatMessage(ChatRole.System, context.SystemInstructions),
-                new ChatMessage(ChatRole.Assistant, context.InitialAssistantMessage),
                 new ChatMessage(ChatRole.User, prompt)
             })
             {
@@ -58,22 +57,19 @@ static partial class Demo
             OpenAICitationResponse citationResponse = null;
             await foreach (var message in completionResponse)
             {
-                //await foreach (var message in choice.())
+                if (message.AzureExtensionsContext != null)
                 {
-                    if (message.AzureExtensionsContext != null)
+                    var extensionMessage = message.AzureExtensionsContext.Messages.FirstOrDefault();
+                    if (extensionMessage != null && !string.IsNullOrWhiteSpace(extensionMessage.Content))
                     {
-                        var extensionMessage = message.AzureExtensionsContext.Messages.FirstOrDefault();
-                        if (extensionMessage != null && !string.IsNullOrWhiteSpace(extensionMessage.Content))
-                        {
-                            Console.WriteLine(extensionMessage.Content);
-                            citationResponse =
-                                JsonSerializer.Deserialize<OpenAICitationResponse>(extensionMessage.Content, options);
-                        }
+                        Console.WriteLine(extensionMessage.Content);
+                        citationResponse =
+                            JsonSerializer.Deserialize<OpenAICitationResponse>(extensionMessage.Content, options);
                     }
-                    else
-                    {
-                        Console.Write(message.ContentUpdate);
-                    }
+                }
+                else
+                {
+                    Console.Write(message.ContentUpdate);
                 }
             }
 
