@@ -7,4 +7,5 @@ Various Azure Open AI Samples in .NET
  - [Embeddings](src/Strathweb.Samples.AzureOpenAI.Embeddings/) - similarity scores using embeddings
     * 📄 [Blog post](https://www.strathweb.com/2023/09/using-embeddings-model-with-azure-openai/)
  - [Bring Your Own Data](src/Strathweb.Samples.AzureOpenAI.BringYourOwnData/) - retrieval augmented generation pattern using integration into Azure AI Search
-    * 📄 [Blog post part 1](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)
+    * 📄 [Blog post part 1: Setting up Azure AI Search](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)
+    * 📄 [Blog post part 2: Building the client application](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-2/)
