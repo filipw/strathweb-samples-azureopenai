@@ -14,41 +14,43 @@ static partial class Demo
         var openAiClient = new OpenAIClient(new Uri(context.AzureOpenAiServiceEndpoint),
             new AzureKeyCredential(context.AzureOpenAiServiceKey));
 
-        var searchExtension = new AzureCognitiveSearchChatExtensionConfiguration
-        {
-            ShouldRestrictResultScope = context.RestrictToSearchResults,
-            SearchEndpoint = new Uri($"https://{context.AzureSearchService}.search.windows.net"),
-            IndexName = context.AzureSearchIndex,
-            DocumentCount = (int)context.SearchDocumentCount,
-            QueryType = new AzureCognitiveSearchQueryType(context.AzureSearchQueryType),
-            SemanticConfiguration = context.AzureSearchQueryType is "semantic" or "vectorSemanticHybrid"
-                ? context.AzureSearchSemanticSearchConfig
-                : "",
-            FieldMappingOptions = new AzureCognitiveSearchIndexFieldMappingOptions
-            {
-                ContentFieldNames = { "content" },
-                UrlFieldName = "blog_url",
-                TitleFieldName = "metadata_storage_name",
-                FilepathFieldName = "metadata_storage_path"
-            }
-        };
-        
-        searchExtension.SetSearchKey(context.AzureSearchKey);
-        
         while (true)
         {
             var prompt = Console.ReadLine();
-            var request = new ChatCompletionsOptions(context.AzureOpenAiDeploymentName, new[] {
-                new ChatMessage(ChatRole.System, context.SystemInstructions),
-                new ChatMessage(ChatRole.User, prompt)
-            })
+            var request = new ChatCompletionsOptions
             {
+                DeploymentName = context.AzureOpenAiDeploymentName,
+                Messages = {
+                    new ChatRequestSystemMessage(context.SystemInstructions),
+                    new ChatRequestUserMessage(prompt)
+                },
                 Temperature = 1,
                 MaxTokens = 400,
                 NucleusSamplingFactor = 1f,
                 AzureExtensionsOptions = new AzureChatExtensionsOptions
                 {
-                    Extensions = { searchExtension }
+                    Extensions = 
+                    { 
+                        new AzureCognitiveSearchChatExtensionConfiguration
+                        {
+                            ShouldRestrictResultScope = context.RestrictToSearchResults,
+                            SearchEndpoint = new Uri($"https://{context.AzureSearchService}.search.windows.net"),
+                            Key = context.AzureSearchKey,
+                            IndexName = context.AzureSearchIndex,
+                            DocumentCount = (int)context.SearchDocumentCount,
+                            QueryType = new AzureCognitiveSearchQueryType(context.AzureSearchQueryType),
+                            SemanticConfiguration = context.AzureSearchQueryType is "semantic" or "vectorSemanticHybrid"
+                                ? context.AzureSearchSemanticSearchConfig
+                                : "",
+                            FieldMappingOptions = new AzureCognitiveSearchIndexFieldMappingOptions
+                            {
+                                ContentFieldNames = { "content" },
+                                UrlFieldName = "blog_url",
+                                TitleFieldName = "metadata_storage_name",
+                                FilepathFieldName = "metadata_storage_path"
+                            }
+                        } 
+                    }
                 }
             };
 
@@ -62,7 +64,6 @@ static partial class Demo
                     var extensionMessage = message.AzureExtensionsContext.Messages.FirstOrDefault();
                     if (extensionMessage != null && !string.IsNullOrWhiteSpace(extensionMessage.Content))
                     {
-                        Console.WriteLine(extensionMessage.Content);
                         citationResponse =
                             JsonSerializer.Deserialize<OpenAICitationResponse>(extensionMessage.Content, options);
                     }
