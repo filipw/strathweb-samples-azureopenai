@@ -48,7 +48,8 @@ static partial class Demo
                                 UrlFieldName = "blog_url",
                                 TitleFieldName = "metadata_storage_name",
                                 FilepathFieldName = "metadata_storage_path"
-                            }
+                            },
+                            RoleInformation = context.SystemInstructions
                         } 
                     }
                 }
@@ -56,6 +57,7 @@ static partial class Demo
 
             var completionResponse = await openAiClient.GetChatCompletionsStreamingAsync(request);
 
+            AnsiConsole.Markup(":robot: ");
             OpenAICitationResponse citationResponse = null;
             await foreach (var message in completionResponse)
             {
@@ -93,6 +95,10 @@ static partial class Demo
                     Header = new PanelHeader("References")
                 };
                 AnsiConsole.Write(panel);
+            }
+            else
+            {
+                Console.WriteLine();
             }
         }
     }
