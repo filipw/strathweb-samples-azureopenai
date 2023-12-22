@@ -3,28 +3,29 @@ using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Azure;
 using Azure.AI.OpenAI;
+using Spectre.Console;
 using Strathweb.Samples.AzureOpenAI.Shared;
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var feed = await ArxivHelper.FetchArticles("ti:\"quantum computing\"", date, 3);
+var feed = await ArxivHelper.FetchArticles("ti:\"quantum computing\"", date, 5);
+
 if (feed == null) 
 {
     Console.WriteLine("Failed to load the feed.");
     return;
 }
 
-if (feed.Entries.Count == 0) 
+if (TryWriteOutItems(feed))
 {
-    Console.WriteLine("No entries for the given date.");
-    return;
+    Console.WriteLine();
+    Console.WriteLine();
+
+    var inputEntries = feed.Entries.Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
+    await EnhanceWithOpenAI(string.Join(Environment.NewLine, inputEntries));
 }
 
-var sentenceSeparators = new[] { ".", "\n" };
-
-await AskOpenAI(feed);
-
-async Task AskOpenAI(Feed feed)
+async Task EnhanceWithOpenAI(string prompt)
 {
     var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
                                      throw new ArgumentException("AZURE_OPENAI_SERVICE_ENDPOINT is mandatory");
@@ -38,23 +39,13 @@ async Task AskOpenAI(Feed feed)
     var speechRegion = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ??
                        throw new ArgumentException("Missing SPEECH_REGION");
     
-    object consoleLock = new();
+    var sentenceSeparators = new[] { ".", "\n" };
+    
     var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
     speechConfig.SpeechSynthesisVoiceName = "en-US-JennyMultilingualNeural";
     
     var audioOutputConfig = AudioConfig.FromDefaultSpeakerOutput();
     using var speechSynthesizer = new SpeechSynthesizer(speechConfig, audioOutputConfig);
-    speechSynthesizer.Synthesizing += (_, _) =>
-    {
-        lock (consoleLock)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write($"[Audio]");
-            Console.ResetColor();
-        }
-    };
-
-    var inputEntries = feed.Entries.Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
 
     OpenAIClient client = new(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
     var completionsOptions = new ChatCompletionsOptions
@@ -72,7 +63,7 @@ async Task AskOpenAI(Feed feed)
                     You are a summarization engine for Arxiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 2-3 sentence format.
                     Your output is suitable to be read out loud e.g. do not include any bullet points or itemization. Each summary should be a separate paragraph.
                 """),
-            new ChatRequestUserMessage(string.Join(Environment.NewLine, inputEntries))
+            new ChatRequestUserMessage(prompt)
         }
     };
     var responseStream = await client.GetChatCompletionsStreamingAsync(completionsOptions);
@@ -99,4 +90,39 @@ async Task AskOpenAI(Feed feed)
             }
         }
     }
+}
+
+bool TryWriteOutItems(Feed feed) 
+{
+    if (feed.Entries.Count == 0) 
+    {
+        Console.WriteLine("No items today...");
+        return false;
+    }
+
+    var table = new Table
+    {
+        Border = TableBorder.HeavyHead
+    };
+
+    table.AddColumn(new TableColumn("Rating").Centered());
+    table.AddColumn("Updated");
+    table.AddColumn("Title");
+    table.AddColumn("Authors");
+    table.AddColumn("Link");
+
+    foreach (var entry in feed.Entries)
+    {
+        table.AddRow(
+            $"{Markup.Escape(entry.Rating.ToString())}", 
+            $"{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}", 
+            $"{Markup.Escape(entry.Title)}", 
+            $"{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}",
+            $"[link={entry.PdfLink}]{entry.PdfLink}[/]"
+        );
+    }
+
+    AnsiConsole.Write(table);
+
+    return true;
 }
