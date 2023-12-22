@@ -7,7 +7,7 @@ using Strathweb.Samples.AzureOpenAI.Shared;
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var feed = await ArxivHelper.FetchArticles(date);
+var feed = await ArxivHelper.FetchArticles("cat:quant-ph", date);
 if (feed == null) 
 {
     Console.WriteLine("Failed to load the feed.");
@@ -76,20 +76,20 @@ async Task<RatedArticleResponse[]> GetAIRatings(Feed feed)
 
     var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
 
-    var completionsOptions = new CompletionsOptions
+    var completionsOptions = new ChatCompletionsOptions
     {
         DeploymentName = azureOpenAiDeploymentName,
         Temperature = 0,
         MaxTokens = 2400,
         NucleusSamplingFactor = 1,
         FrequencyPenalty = 0,
-        PresencePenalty = 0,
-        GenerationSampleCount = 1,
+        PresencePenalty = 0
     };
 
     var input = string.Join("\n", feed.Entries.Select(x => x.Id + ", " + x.Title));
 
-    completionsOptions.Prompts.Add(
+    completionsOptions.Messages.Add(
+        new ChatRequestUserMessage(
     """
 Rate on a scale of 1-5 how relevant each headline is to quantum computing software engineers. 
 Titles mentioning quantum frameworks, software, algorithms, machine learning and error correction should be rated highly. Quantum computing hardware topics should be rated lower. Other quantum physics topics should get low rating. Produce JSON result as specified in the output example.
@@ -110,12 +110,12 @@ Titles mentioning quantum frameworks, software, algorithms, machine learning and
 
 <Input>
 """ + "\n" + input + "\n" + "<Output>"
-    );
+    ));
 
     // debug only
     // Console.WriteLine("Raw input: " + completionsOptions.Prompts[0]);
 
-    var completionsResponse = await client.GetCompletionsAsync(completionsOptions);
+    var completionsResponse = await client.GetChatCompletionsAsync(completionsOptions);
     if (completionsResponse.Value.Choices.Count == 0)
     {
         Console.WriteLine("No completions found.");
@@ -123,7 +123,7 @@ Titles mentioning quantum frameworks, software, algorithms, machine learning and
     }
 
     var preferredChoice = completionsResponse.Value.Choices[0];
-    var rawJsonResponse = preferredChoice.Text.Trim();
+    var rawJsonResponse = preferredChoice.Message.Content.Trim();
 
     // debug only
     // Console.WriteLine("Raw JSON response: " + rawJsonResponse);

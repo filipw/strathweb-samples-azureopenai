@@ -13,7 +13,7 @@ var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var feed = await ArxivHelper.FetchArticles(date);
+var feed = await ArxivHelper.FetchArticles("cat:quant-ph", date);
 if (feed == null) 
 {
     Console.WriteLine("Failed to load the feed.");

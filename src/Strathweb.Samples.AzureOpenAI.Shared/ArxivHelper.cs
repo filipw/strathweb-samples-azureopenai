@@ -4,11 +4,12 @@ namespace Strathweb.Samples.AzureOpenAI.Shared;
 
 public static class ArxivHelper
 {
-    public static async Task<Feed> FetchArticles(string date)
+    public static async Task<Feed> FetchArticles(string searchQuery, string date, int maxResults = 40)
     {
-        // cap at 40 results
+        // cat:quant-ph
+        // ti:"quantum computing"
         var feedUrl =
-            $"http://export.arxiv.org/api/query?search_query=cat:quant-ph+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results=40&sortBy=submittedDate&sortOrder=descending";
+            $"https://export.arxiv.org/api/query?search_query={searchQuery}+AND+submittedDate:[{date}0000+TO+{date}2359]&start=0&max_results={maxResults}&sortBy=submittedDate&sortOrder=descending";
         var httpClient = new HttpClient();
         var httpResponse = await httpClient.GetAsync(feedUrl);
 
