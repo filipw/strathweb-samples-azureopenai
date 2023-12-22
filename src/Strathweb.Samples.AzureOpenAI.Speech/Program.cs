@@ -19,7 +19,6 @@ if (feed == null)
 if (TryWriteOutItems(feed))
 {
     Console.WriteLine();
-    Console.WriteLine();
 
     var inputEntries = feed.Entries.Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
     await EnhanceWithOpenAI(string.Join(Environment.NewLine, inputEntries));
@@ -61,7 +60,7 @@ async Task EnhanceWithOpenAI(string prompt)
             new ChatRequestSystemMessage(
                 """
                     You are a summarization engine for Arxiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 2-3 sentence format.
-                    Your output is suitable to be read out loud e.g. do not include any bullet points or itemization. Each summary should be a separate paragraph.
+                    Your output is suitable to be read out loud e.g. do not include any bullet points or numbering of summaries. Each summary should be a simple plain text, separate paragraph.
                 """),
             new ChatRequestUserMessage(prompt)
         }
@@ -105,7 +104,6 @@ bool TryWriteOutItems(Feed feed)
         Border = TableBorder.HeavyHead
     };
 
-    table.AddColumn(new TableColumn("Rating").Centered());
     table.AddColumn("Updated");
     table.AddColumn("Title");
     table.AddColumn("Authors");
@@ -114,7 +112,6 @@ bool TryWriteOutItems(Feed feed)
     foreach (var entry in feed.Entries)
     {
         table.AddRow(
-            $"{Markup.Escape(entry.Rating.ToString())}", 
             $"{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}", 
             $"{Markup.Escape(entry.Title)}", 
             $"{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}",
