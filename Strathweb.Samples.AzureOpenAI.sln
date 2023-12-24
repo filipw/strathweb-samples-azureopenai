@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.BringYourOwnData", "src\Strathweb.Samples.AzureOpenAI.BringYourOwnData\Strathweb.Samples.AzureOpenAI.BringYourOwnData.csproj", "{BF39E37A-5D86-404B-9C0E-1258F83235CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.Speech", "src\Strathweb.Samples.AzureOpenAI.Speech\Strathweb.Samples.AzureOpenAI.Speech.csproj", "{AB4628DB-71E6-4583-98FB-383FDCB37D12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.SpeechSynthesis", "src\Strathweb.Samples.AzureOpenAI.SpeechSynthesis\Strathweb.Samples.AzureOpenAI.SpeechSynthesis.csproj", "{AB4628DB-71E6-4583-98FB-383FDCB37D12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
