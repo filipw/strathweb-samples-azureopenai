@@ -8,7 +8,7 @@ using Strathweb.Samples.AzureOpenAI.Shared;
 
 var date = args.Length == 1 ? args[0] : DateTime.UtcNow.ToString("yyyyMMdd");
 
-var feed = await ArxivHelper.FetchArticles("ti:\"quantum computing\"", date, 5);
+var feed = await ArxivHelper.FetchArticles("ti:\"quantum computing\"", date);
 
 if (feed == null) 
 {
@@ -20,7 +20,7 @@ if (TryWriteOutItems(feed))
 {
     Console.WriteLine();
 
-    var inputEntries = feed.Entries.Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
+    var inputEntries = feed.Entries.Take(3).Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
     await EnhanceWithOpenAI(string.Join(Environment.NewLine, inputEntries));
 }
 
@@ -67,6 +67,9 @@ async Task EnhanceWithOpenAI(string prompt)
     };
     var responseStream = await client.GetChatCompletionsStreamingAsync(completionsOptions);
 
+    AnsiConsole.Write(new Rule("[red]Summary of the last 3 articles[/]"));
+    
+    var output = new Paragraph();
     var gptBuffer = new StringBuilder();
     await foreach (var completionUpdate in responseStream)
     {
@@ -76,7 +79,7 @@ async Task EnhanceWithOpenAI(string prompt)
             continue;
         }
 
-        Console.Write($"{message}");
+        output.Append($"{message}");
         gptBuffer.Append(message);
 
         if (sentenceSeparators.Any(message.Contains))
