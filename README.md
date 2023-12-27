@@ -9,3 +9,4 @@ Various Azure Open AI Samples in .NET
  - [Bring Your Own Data](src/Strathweb.Samples.AzureOpenAI.BringYourOwnData/) - retrieval augmented generation pattern using integration into Azure AI Search
     * 📄 [Blog post part 1: Setting up Azure AI Search](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)
     * 📄 [Blog post part 2: Building the client application](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-2/)
+- [Speech Synthesis](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/) - Azure OpenAI summarization with Azure Cognitive speech synthesis
