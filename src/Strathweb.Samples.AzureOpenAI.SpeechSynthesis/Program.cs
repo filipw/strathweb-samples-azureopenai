@@ -67,9 +67,8 @@ async Task EnhanceWithOpenAI(string prompt)
     };
     var responseStream = await client.GetChatCompletionsStreamingAsync(completionsOptions);
 
-    AnsiConsole.Write(new Rule("[red]Summary of the last 3 articles[/]"));
+    AnsiConsole.Write(new Rule("[green]Summary of the last 3 articles[/]"));
     
-    var output = new Paragraph();
     var gptBuffer = new StringBuilder();
     await foreach (var completionUpdate in responseStream)
     {
@@ -79,7 +78,7 @@ async Task EnhanceWithOpenAI(string prompt)
             continue;
         }
 
-        output.Append($"{message}");
+        AnsiConsole.Write(message);
         gptBuffer.Append(message);
 
         if (sentenceSeparators.Any(message.Contains))
