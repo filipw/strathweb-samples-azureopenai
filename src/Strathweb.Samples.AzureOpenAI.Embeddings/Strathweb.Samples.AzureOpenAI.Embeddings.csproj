@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Azure.AI.OpenAI" />
-        <PackageReference Include="Microsoft.SemanticKernel" />
+        <PackageReference Include="System.Numerics.Tensors" />
         <PackageReference Include="spectre.console" />
     </ItemGroup>
 

@@ -1,6 +1,6 @@
-﻿using Azure;
+﻿using System.Numerics.Tensors;
+using Azure;
 using Azure.AI.OpenAI;
-using Microsoft.SemanticKernel.AI.Embeddings.VectorOperations;
 using Spectre.Console;
 using Strathweb.Samples.AzureOpenAI.Shared;
 
@@ -49,7 +49,7 @@ foreach (var entry in feed.Entries)
         new EmbeddingsOptions(azureOpenAiDeploymentName,  new[] { entry.Title + Environment.NewLine + Environment.NewLine + entry.Summary }));
     
     var vector = embedding.Value.Data[0].Embedding.ToArray();
-    var similarity = vector.CosineSimilarity(baselineVector);
+    var similarity = TensorPrimitives.CosineSimilarity(vector, baselineVector);
     
     entriesWithEmbeddings.Add(new EntryWithEmbeddingItem
     {
