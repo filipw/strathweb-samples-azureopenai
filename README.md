@@ -10,4 +10,4 @@ Various Azure Open AI Samples in .NET
     * 📄 [Blog post part 1: Setting up Azure AI Search](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)
     * 📄 [Blog post part 2: Calling Azure OpenAI Service via REST API](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-2/)
     * 📄 [Blog post part 3: Calling Azure OpenAI Service via .NET SDK](https://www.strathweb.com/2023/12/using-your-own-data-with-gpt-models-in-azure-openai-part-3/)
-- [Speech Synthesis](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/) - Azure OpenAI summarization with Azure Cognitive speech synthesis
+- [Speech Synthesis](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/) - Azure AI Speech summarization with Azure Cognitive speech synthesis
