@@ -3,14 +3,22 @@ using Spectre.Console;
 using Strathweb.Samples.AzureOpenAI.BringYourOwnData;
 using static Strathweb.Samples.AzureOpenAI.BringYourOwnData.Demo;
 
+var isVector = args.FirstOrDefault()?.ToLowerInvariant() == "vector";
+
+var searchServiceVariableName = isVector ? "AZURE_SEARCH_SERVICE_NAME_VECTOR" : "AZURE_SEARCH_SERVICE_NAME";
+var serviceKeyVariableName = isVector ? "AZURE_SEARCH_SERVICE_KEY_VECTOR" : "AZURE_SEARCH_SERVICE_KEY";
+var searchServiceIndexVariableName = isVector ? "AZURE_SEARCH_SERVICE_INDEX_VECTOR" : "AZURE_SEARCH_SERVICE_INDEX";
+
 var context = new AzureOpenAiContext
 {
     AzureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ?? throw new Exception("AZURE_OPENAI_SERVICE_ENDPOINT missing"),
     AzureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ?? throw new Exception("AZURE_OPENAI_API_KEY missing"),
     AzureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? throw new Exception("AZURE_OPENAI_DEPLOYMENT_NAME missing"),
-    AzureSearchService = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_NAME") ?? throw new Exception("AZURE_SEARCH_SERVICE_NAME missing"),
-    AzureSearchKey = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_KEY") ?? throw new Exception("AZURE_SEARCH_SERVICE_KEY missing"),
-    AzureSearchIndex = Environment.GetEnvironmentVariable("AZURE_SEARCH_SERVICE_INDEX") ?? throw new Exception("AZURE_SEARCH_SERVICE_INDEX missing"),
+    AzureSearchService = Environment.GetEnvironmentVariable(searchServiceVariableName) ?? throw new Exception($"{searchServiceVariableName} missing"),
+    AzureSearchKey = Environment.GetEnvironmentVariable(serviceKeyVariableName) ?? throw new Exception($"{serviceKeyVariableName} missing"),
+    AzureSearchIndex = Environment.GetEnvironmentVariable(searchServiceIndexVariableName) ?? throw new Exception($"{searchServiceIndexVariableName} missing"),
+    EmbeddingEndpoint = isVector ? (Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_ENDPOINT") ?? throw new ArgumentException("AZURE_OPENAI_EMBEDDING_ENDPOINT is mandatory")) : null,
+    UseVectorSearch = isVector,    
     RestrictToSearchResults = true,
     SearchDocumentCount = 3,
     AzureSearchQueryType = "simple",
