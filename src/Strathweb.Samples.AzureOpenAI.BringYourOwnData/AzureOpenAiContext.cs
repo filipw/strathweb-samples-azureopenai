@@ -62,4 +62,9 @@ public record AzureOpenAiContext
     /// System-level prompt instructions for the OpenAI model
     /// </summary>
     public string SystemInstructions { get; init; }
+    
+    /// <summary>
+    /// URL of the embedding endpoint for vectorization
+    /// </summary>
+    public string EmbeddingEndpoint { get; init; }
 }
