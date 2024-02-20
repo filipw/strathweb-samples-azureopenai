@@ -49,7 +49,9 @@ static partial class Demo
                                 TitleFieldName = "metadata_storage_name",
                                 FilepathFieldName = "metadata_storage_path"
                             },
-                            RoleInformation = context.SystemInstructions
+                            RoleInformation = context.SystemInstructions,
+                            EmbeddingEndpoint = context.AzureSearchQueryType is "vector" ? new Uri(context.EmbeddingEndpoint) : null,
+                            EmbeddingKey = context.AzureSearchQueryType is "vector" ? context.AzureOpenAiServiceKey : null
                         } 
                     }
                 }

@@ -67,9 +67,4 @@ public record AzureOpenAiContext
     /// URL of the embedding endpoint for vectorization
     /// </summary>
     public string EmbeddingEndpoint { get; init; }
-    
-    /// <summary>
-    /// Flag determining whether vector search should be used
-    /// </summary>
-    public bool UseVectorSearch { get; init; }
 }
