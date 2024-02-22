@@ -65,6 +65,7 @@ public record AzureOpenAiContext
     
     /// <summary>
     /// URL of the embedding endpoint for vectorization
+    /// Used when AzureSearchQueryType is vector (or related)
     /// </summary>
     public string EmbeddingEndpoint { get; init; }
 }
