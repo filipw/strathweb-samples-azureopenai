@@ -351,3 +351,5 @@ MigrationBackup/
 
 variables.env
 .vscode
+.DS_Store
+.idea
