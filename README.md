@@ -2,13 +2,29 @@
 
 Various Azure Open AI Samples in .NET
 
- - [Classification](src/Strathweb.Samples.AzureOpenAI.GptClassification/) - classification of natural language data.
-    * 📄 [Blog post](https://www.strathweb.com/2023/04/building-gpt-powered-applications-with-azure-openai-service/)
- - [Embeddings](src/Strathweb.Samples.AzureOpenAI.Embeddings/) - similarity scores using embeddings
-    * 📄 [Blog post](https://www.strathweb.com/2023/09/using-embeddings-model-with-azure-openai/)
- - [Bring Your Own Data](src/Strathweb.Samples.AzureOpenAI.BringYourOwnData/) - retrieval augmented generation pattern using integration into Azure AI Search
-    * 📄 [Blog post part 1: Setting up Azure AI Search](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)
-    * 📄 [Blog post part 2: Calling Azure OpenAI Service via REST API](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-2/)
-    * 📄 [Blog post part 3: Calling Azure OpenAI Service via .NET SDK](https://www.strathweb.com/2023/12/using-your-own-data-with-gpt-models-in-azure-openai-part-3/)
-    * 📄 [Blog post part 4: Adding vector search](https://www.strathweb.com/2024/02/using-your-own-data-with-gpt-models-in-azure-openai-part-4/)
-- [Speech Synthesis](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/) - Azure AI Speech summarization with Azure Cognitive speech synthesis
+## GPT-based Classification
+
+ → classification of natural language data\
+ 📝 [Blog post](https://www.strathweb.com/2023/04/building-gpt-powered-applications-with-azure-openai-service/) \
+ 💻 [Code](src/Strathweb.Samples.AzureOpenAI.GptClassification/)
+
+
+## Embeddings
+
+ → similarity scores using embeddings \
+ 📝 [Blog post](https://www.strathweb.com/2023/09/using-embeddings-model-with-azure-openai/)\
+ 💻 [Code](src/Strathweb.Samples.AzureOpenAI.Embeddings/)
+
+## Bring Your Own Data
+
+ → retrieval augmented generation pattern using integration into Azure AI Search\
+ 📝 [Blog post part 1: Setting up Azure AI Search](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-1/)\
+ 📝 [Blog post part 2: Calling Azure OpenAI Service via REST API](https://www.strathweb.com/2023/11/using-your-own-data-with-gpt-models-in-azure-openai-part-2/)\
+ 📝 [Blog post part 3: Calling Azure OpenAI Service via .NET SDK](https://www.strathweb.com/2023/12/using-your-own-data-with-gpt-models-in-azure-openai-part-3/)\
+ 📝 [Blog post part 4: Adding vector search](https://www.strathweb.com/2024/02/using-your-own-data-with-gpt-models-in-azure-openai-part-4/)\
+ 💻 [Code](src/Strathweb.Samples.AzureOpenAI.BringYourOwnData/)
+
+## GPT Text Generation + Speech Synthesis
+
+ → Azure OpenAI summarization with Azure AI Speech speech synthesis\
+ 💻 [Code](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/)
