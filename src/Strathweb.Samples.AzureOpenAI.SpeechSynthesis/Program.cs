@@ -20,11 +20,11 @@ if (TryWriteOutItems(feed))
 {
     Console.WriteLine();
 
-    var inputEntries = feed.Entries.Take(3).Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
-    await EnhanceWithOpenAI(string.Join(Environment.NewLine, inputEntries));
+    var inputEntries = feed.Entries.Select(e => $"Title: {e.Title}{Environment.NewLine}Abstract: {e.Summary}");
+    await EnhanceWithOpenAi(string.Join(Environment.NewLine, inputEntries));
 }
 
-async Task EnhanceWithOpenAI(string prompt)
+async Task EnhanceWithOpenAi(string prompt)
 {
     var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
                                      throw new ArgumentException("AZURE_OPENAI_SERVICE_ENDPOINT is mandatory");
@@ -37,8 +37,6 @@ async Task EnhanceWithOpenAI(string prompt)
                     throw new ArgumentException("Missing SPEECH_KEY");
     var speechRegion = Environment.GetEnvironmentVariable("AZURE_SPEECH_REGION") ??
                        throw new ArgumentException("Missing SPEECH_REGION");
-    
-    var sentenceSeparators = new[] { ".", "\n" };
     
     var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
     speechConfig.SpeechSynthesisVoiceName = "en-US-JennyMultilingualNeural";
@@ -67,7 +65,7 @@ async Task EnhanceWithOpenAI(string prompt)
     };
     var responseStream = await client.GetChatCompletionsStreamingAsync(completionsOptions);
 
-    AnsiConsole.Write(new Rule("[green]Summary of the last 3 articles[/]"));
+    AnsiConsole.Write(new Rule("[green]Summary of the articles[/]"));
     
     var gptBuffer = new StringBuilder();
     await foreach (var completionUpdate in responseStream)
@@ -81,7 +79,8 @@ async Task EnhanceWithOpenAI(string prompt)
         AnsiConsole.Write(message);
         gptBuffer.Append(message);
 
-        if (sentenceSeparators.Any(message.Contains))
+        // synthesize speech when encountering sentence breaks
+        if (message.Contains("\n") || message.Contains(".") || message.Contains(","))
         {
             var sentence = gptBuffer.ToString().Trim();
             if (!string.IsNullOrEmpty(sentence))
