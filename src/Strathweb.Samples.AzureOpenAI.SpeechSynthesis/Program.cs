@@ -39,12 +39,16 @@ async Task EnhanceWithOpenAi(string prompt)
                        throw new ArgumentException("Missing SPEECH_REGION");
     
     var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
-    speechConfig.SpeechSynthesisVoiceName = "en-US-JennyMultilingualNeural";
+    speechConfig.SpeechSynthesisVoiceName = "en-GB-SoniaNeural";
     
     var audioOutputConfig = AudioConfig.FromDefaultSpeakerOutput();
     using var speechSynthesizer = new SpeechSynthesizer(speechConfig, audioOutputConfig);
 
-    OpenAIClient client = new(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
+    var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
+    var systemPrompt = """
+        You are a summarization engine for ArXiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 2-3 sentence format.
+        Your output is going to stylistically resemble speech - that is, do not include any bullet points, numbering or other characters not appearing in spoken language. Each summary should be a simple, plain text, separate paragraph.
+    """;
     var completionsOptions = new ChatCompletionsOptions
     {
         Temperature = 0,
@@ -55,11 +59,7 @@ async Task EnhanceWithOpenAi(string prompt)
         DeploymentName = azureOpenAiDeploymentName,
         Messages =
         {
-            new ChatRequestSystemMessage(
-                """
-                    You are a summarization engine for Arxiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 2-3 sentence format.
-                    Your output is suitable to be read out loud e.g. do not include any bullet points or numbering of summaries. Each summary should be a simple plain text, separate paragraph.
-                """),
+            new ChatRequestSystemMessage(systemPrompt),
             new ChatRequestUserMessage(prompt)
         }
     };
