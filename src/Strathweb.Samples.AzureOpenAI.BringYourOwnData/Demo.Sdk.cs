@@ -31,18 +31,18 @@ static partial class Demo
                 {
                     Extensions = 
                     { 
-                        new AzureCognitiveSearchChatExtensionConfiguration
+                        new AzureSearchChatExtensionConfiguration()
                         {
                             ShouldRestrictResultScope = context.RestrictToSearchResults,
                             SearchEndpoint = new Uri($"https://{context.AzureSearchService}.search.windows.net"),
-                            Key = context.AzureSearchKey,
+                            Authentication = new OnYourDataApiKeyAuthenticationOptions(context.AzureSearchKey),
                             IndexName = context.AzureSearchIndex,
                             DocumentCount = (int)context.SearchDocumentCount,
-                            QueryType = new AzureCognitiveSearchQueryType(context.AzureSearchQueryType),
+                            QueryType = new AzureSearchQueryType(context.AzureSearchQueryType),
                             SemanticConfiguration = context.AzureSearchQueryType is "semantic" or "vectorSemanticHybrid"
                                 ? context.AzureSearchSemanticSearchConfig
                                 : "",
-                            FieldMappingOptions = new AzureCognitiveSearchIndexFieldMappingOptions
+                            FieldMappingOptions = new AzureSearchIndexFieldMappingOptions()
                             {
                                 ContentFieldNames = { "content" },
                                 UrlFieldName = "blog_url",
@@ -50,8 +50,7 @@ static partial class Demo
                                 FilepathFieldName = "metadata_storage_path"
                             },
                             RoleInformation = context.SystemInstructions,
-                            EmbeddingEndpoint = context.AzureSearchQueryType is "vector" ? new Uri(context.EmbeddingEndpoint) : null,
-                            EmbeddingKey = context.AzureSearchQueryType is "vector" ? context.AzureOpenAiServiceKey : null
+                            VectorizationSource = context.AzureSearchQueryType is "vector" ? new OnYourDataEndpointVectorizationSource(new Uri(context.EmbeddingEndpoint), new OnYourDataApiKeyAuthenticationOptions(context.AzureOpenAiServiceKey)) : null
                         } 
                     }
                 }
@@ -60,36 +59,29 @@ static partial class Demo
             var completionResponse = await openAiClient.GetChatCompletionsStreamingAsync(request);
 
             AnsiConsole.Markup(":robot: ");
-            OpenAICitationResponse citationResponse = null;
+            var citationsResponses = new List<AzureChatExtensionDataSourceResponseCitation>();
             await foreach (var message in completionResponse)
             {
+                Console.Write(message.ContentUpdate);
+
                 if (message.AzureExtensionsContext != null)
                 {
-                    var extensionMessage = message.AzureExtensionsContext.Messages.FirstOrDefault();
-                    if (extensionMessage != null && !string.IsNullOrWhiteSpace(extensionMessage.Content))
-                    {
-                        citationResponse =
-                            JsonSerializer.Deserialize<OpenAICitationResponse>(extensionMessage.Content, options);
-                    }
-                }
-                else
-                {
-                    Console.Write(message.ContentUpdate);
+                    citationsResponses.AddRange(message.AzureExtensionsContext.Citations);
                 }
             }
 
 
-            if (citationResponse != null && citationResponse.Citations.Any())
+            if (citationsResponses.Any())
             {
                 Console.WriteLine();
                 var referencesContent = new StringBuilder();
                 referencesContent.AppendLine();
-
-                for (var i = 1; i <= citationResponse.Citations.Length; i++)
+                
+                for (var i = 1; i <= citationsResponses.Count; i++)
                 {
-                    var citation = citationResponse.Citations[i - 1];
+                    var citation = citationsResponses[i - 1];
                     referencesContent.AppendLine($"  :page_facing_up: [[doc{i}]] {citation.Title}");
-                    referencesContent.AppendLine($"  :link: {citation.Url ?? citation.FilePath}");
+                    referencesContent.AppendLine($"  :link: {citation.Url ?? citation.Filepath}");
                 }
 
                 var panel = new Panel(referencesContent.ToString())
