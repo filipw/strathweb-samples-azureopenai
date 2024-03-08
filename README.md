@@ -5,14 +5,13 @@ Various Azure Open AI Samples in .NET
 ## GPT-based Classification
 
  → classification of natural language data\
- 📝 [Blog post](https://www.strathweb.com/2023/04/building-gpt-powered-applications-with-azure-openai-service/) \
+ 📝 [Blog post: Building GPT powered applications with Azure OpenAI Service](https://www.strathweb.com/2023/04/building-gpt-powered-applications-with-azure-openai-service/) \
  💻 [Code](src/Strathweb.Samples.AzureOpenAI.GptClassification/)
-
 
 ## Embeddings
 
  → similarity scores using embeddings \
- 📝 [Blog post](https://www.strathweb.com/2023/09/using-embeddings-model-with-azure-openai/)\
+ 📝 [Blog post: Using embeddings model with Azure OpenAI Service](https://www.strathweb.com/2023/09/using-embeddings-model-with-azure-openai/)\
  💻 [Code](src/Strathweb.Samples.AzureOpenAI.Embeddings/)
 
 ## Bring Your Own Data
@@ -27,4 +26,5 @@ Various Azure Open AI Samples in .NET
 ## GPT Text Generation + Speech Synthesis
 
  → Azure OpenAI summarization with Azure AI Speech speech synthesis\
+ 📝 [Blog post: Combining Azure OpenAI with Azure AI Speech](https://www.strathweb.com/2024/03/combining-azure-openai-with-azure-ai-speech/)\
  💻 [Code](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/)
