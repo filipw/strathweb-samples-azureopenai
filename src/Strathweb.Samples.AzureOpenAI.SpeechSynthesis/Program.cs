@@ -46,7 +46,7 @@ async Task EnhanceWithOpenAi(string prompt)
 
     var client = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint), new AzureKeyCredential(azureOpenAiServiceKey));
     var systemPrompt = """
-        You are a summarization engine for ArXiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 2-3 sentence format.
+        You are a summarization engine for ArXiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 1-2 sentence format.
         Your output is going to stylistically resemble speech - that is, do not include any bullet points, numbering or other characters not appearing in spoken language. Each summary should be a simple, plain text, separate paragraph.
     """;
     var completionsOptions = new ChatCompletionsOptions
@@ -55,7 +55,7 @@ async Task EnhanceWithOpenAi(string prompt)
         NucleusSamplingFactor = 1,
         FrequencyPenalty = 0,
         PresencePenalty = 0,
-        MaxTokens = 800,
+        MaxTokens = 1000,
         DeploymentName = azureOpenAiDeploymentName,
         Messages =
         {
@@ -80,12 +80,12 @@ async Task EnhanceWithOpenAi(string prompt)
         gptBuffer.Append(message);
 
         // synthesize speech when encountering sentence breaks
-        if (message.Contains("\n") || message.Contains(".") || message.Contains(","))
+        if (message.Contains("\n") || message.Contains("."))
         {
             var sentence = gptBuffer.ToString().Trim();
             if (!string.IsNullOrEmpty(sentence))
             {
-                await speechSynthesizer.SpeakTextAsync(sentence);
+                _ = await speechSynthesizer.SpeakTextAsync(sentence);
                 gptBuffer.Clear();
             }
         }
