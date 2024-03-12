@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Azure;
 using Azure.AI.OpenAI;
 using Spectre.Console;
@@ -14,7 +15,10 @@ var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI
                                 throw new Exception("AZURE_OPENAI_DEPLOYMENT_NAME missing");
 
 var systemInstructions = """
-You are an AI assistant for the ArXiv browser application. The application allows the user to query, fetch and summarize scientific papers from Arxiv.org. 
+You are an AI assistant for the ArXiv browser application. The application allows the user to perform ArXiv-related activities specified in the attached functions. 
+Don't make assumptions about what arguments to use with functions - DO ask a follow up question to clarify argument values. Do not select a function if the user query is ambiguous.
+When you invoke a function, provide an additional non-technical message confirming that you performed an activity.
+Current year is 2024.
 """;
 
 var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint),
@@ -96,27 +100,67 @@ while (true)
 
     if (functionCall != null)
     {
-        InvokeFunction(arxivClient, functionCall, functionParams.ToString());
+        await InvokeFunction(arxivClient, functionCall, functionParams.ToString());
     }
 
     Console.WriteLine();
 }
 
-void InvokeFunction(ArxivClient client, string functionName, string functionArguments)
+async Task InvokeFunction(ArxivClient client, string functionName, string functionArguments)
 {
     if (functionName == "FetchPapers")
     {
-        Console.WriteLine("Params: " + functionArguments.ToString());
+        Console.WriteLine("Params: " + functionArguments);
+        var doc = JsonDocument.Parse(functionArguments);
+        var root = doc.RootElement;
+
+        var searchQueryString = root.GetProperty("searchQuery").GetString();
+        var searchQuery = Enum.Parse<SearchQuery>(searchQueryString);
+        var date = root.GetProperty("date").GetDateTime();
+
+        var feed = await client.FetchPapers(searchQuery, date);
+        WriteOutItems(feed);
         return;
     }
     
     if (functionName == "SummarizePaper")
     {
-        Console.WriteLine("Params: " + functionArguments.ToString());
+        Console.WriteLine("Params: " + functionArguments);
         return;
     }
     
     Console.WriteLine("Unknown function");
+}
+
+void WriteOutItems(Feed feed) 
+{
+    if (feed.Entries.Count == 0) 
+    {
+        Console.WriteLine("No items to show...");
+        return;
+    }
+
+    var table = new Table
+    {
+        Border = TableBorder.HeavyHead
+    };
+
+    table.AddColumn("Updated");
+    table.AddColumn("Title");
+    table.AddColumn("Authors");
+    table.AddColumn("Link");
+
+    foreach (var entry in feed.Entries)
+    {
+        table.AddRow(
+            $"{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}", 
+            $"{Markup.Escape(entry.Title)}", 
+            $"{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}",
+            $"[link={entry.PdfLink}]{entry.PdfLink}[/]"
+        );
+    }
+
+    AnsiConsole.Write(table);
 }
 
 class ArxivClient
