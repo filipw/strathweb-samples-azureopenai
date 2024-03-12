@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.SpeechSynthesis", "src\Strathweb.Samples.AzureOpenAI.SpeechSynthesis\Strathweb.Samples.AzureOpenAI.SpeechSynthesis.csproj", "{AB4628DB-71E6-4583-98FB-383FDCB37D12}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.FunctionCalling", "src\Strathweb.Samples.AzureOpenAI.FunctionCalling\Strathweb.Samples.AzureOpenAI.FunctionCalling.csproj", "{55039E6E-F8C7-412A-AE54-31A72EFE4766}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{AB4628DB-71E6-4583-98FB-383FDCB37D12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB4628DB-71E6-4583-98FB-383FDCB37D12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB4628DB-71E6-4583-98FB-383FDCB37D12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73D06A9F-932F-40E9-83E0-0B086A8787A8} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
@@ -51,5 +57,6 @@ Global
 		{CC0E8BCA-24BA-442F-82DC-A3B98C734202} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{AB4628DB-71E6-4583-98FB-383FDCB37D12} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{BF39E37A-5D86-404B-9C0E-1258F83235CE} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
+		{55039E6E-F8C7-412A-AE54-31A72EFE4766} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 	EndGlobalSection
 EndGlobal
