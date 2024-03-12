@@ -1,4 +1,4 @@
-# Azure OpenAI Samples (by strathweb.com)
+# Azure OpenAI Samples
 
 Various Azure Open AI Samples using the .NET SDK
 
