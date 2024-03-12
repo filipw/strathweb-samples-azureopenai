@@ -1,6 +1,6 @@
-# Strathweb.Samples.AzureOpenAI
+# Azure OpenAI Samples (by strathweb.com)
 
-Various Azure Open AI Samples in .NET
+Various Azure Open AI Samples using the .NET SDK
 
 ## GPT-based Classification
 
