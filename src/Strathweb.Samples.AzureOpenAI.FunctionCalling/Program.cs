@@ -14,32 +14,51 @@ var azureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API
 var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ??
                                 throw new Exception("AZURE_OPENAI_DEPLOYMENT_NAME missing");
 
-var systemInstructions = """
-You are an AI assistant for the ArXiv browser application. The application allows the user to perform ArXiv-related activities specified in the attached functions. 
-Don't make assumptions about what arguments to use with functions - DO ask a follow up question to clarify argument values. Do not select a function if the user query is ambiguous.
-When you invoke a function, provide an additional non-technical message confirming that you performed an activity.
-Current year is 2024.
+var systemInstructions = $"""
+You are an AI assistant designed to support users in navigating the ArXiv browser application, focusing on functions related to quantum physics and quantum computing research. 
+The application features specific functions that allow users to fetch papers and summarize them based on precise criteria. Adhere to the following rules rigorously:
+
+1.  **Direct Parameter Requirement:** 
+When a user requests an action, directly related to the functions, you must never infer or generate parameter values, especially paper IDs, on your own. 
+If a parameter is needed for a function call and the user has not provided it, you must explicitly ask the user to provide this specific information.
+
+2.  **Mandatory Explicit Parameters:** 
+For the function `SummarizePaper`, the `paperId` parameter is mandatory and must be provided explicitly by the user. 
+If a user asks for a paper summary without providing a `paperId`, you must ask the user to provide the paper ID.
+
+3.  **Avoid Assumptions:** 
+Do not make assumptions about parameter values. 
+If the user's request lacks clarity or omits necessary details for function execution, you are required to ask follow-up questions to clarify parameter values.
+
+4.  **User Clarification:** 
+If a user's request is ambiguous or incomplete, you should not proceed with function invocation. 
+Instead, ask for the missing information to ensure the function can be executed accurately and effectively.
+
+5. **Grounding in Time:**
+Today is {DateTime.Now.ToString("D")}. When the user asks about papers from today, you will use that date. 
+Yesterday was {DateTime.Now.AddDays(-1).ToString("D")}. You will correctly infer past dates.
+Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore requests for papers from the future.
 """;
 
 var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint),
             new AzureKeyCredential(azureOpenAiServiceKey));
 
 var arxivClient = new ArxivClient(openAiClient, azureOpenAiDeploymentName);
+var messageHistory = new List<ChatRequestMessage>
+{
+    new ChatRequestSystemMessage(systemInstructions)
+};
 
 while (true)
 {
+    Console.Write("> ");
     var prompt = Console.ReadLine();
-    var request = new ChatCompletionsOptions
+    messageHistory.Add(new ChatRequestUserMessage(prompt));
+    
+    var request = new ChatCompletionsOptions(azureOpenAiDeploymentName, messageHistory)
     {
-        DeploymentName = azureOpenAiDeploymentName,
-        Messages =
-        {
-            new ChatRequestSystemMessage(systemInstructions),
-            new ChatRequestUserMessage(prompt)
-        },
-        Temperature = 1,
+        Temperature = 0.2f,
         MaxTokens = 400,
-        NucleusSamplingFactor = 1f,
         Functions =
         {
             new FunctionDefinition
@@ -59,25 +78,25 @@ while (true)
             },
             new FunctionDefinition
             {
-                Description = "Summarizes a given paper based on the title and abstract",
+                Description = "Summarizes a given paper based on the ArXiv ID of the paper.",
                 Name = "SummarizePaper",
                 Parameters = BinaryData.FromObjectAsJson(new
                 {
                     type = "object",
                     properties = new
                     {
-                        title = new { type = "string" },
-                        paperAbstract = new { type = "string" },
+                        paperId = new { type = "string" },
                     },
-                    required = new[] { "title", "paperAbstract" }
+                    required = new[] { "paperId" }
                 })
-
             }
         }
     };
 
     var completionResponse = await openAiClient.GetChatCompletionsStreamingAsync(request);
     var functionParams = new StringBuilder();
+    var modelResponse = new StringBuilder();
+
     string functionCall = null;
     AnsiConsole.Markup(":robot: ");
     await foreach (var message in completionResponse)
@@ -94,15 +113,23 @@ while (true)
         
         if (message.ContentUpdate != null)
         {
+            modelResponse.Append(message.ContentUpdate);
             Console.Write(message.ContentUpdate);
         }
     }
-
+    
     if (functionCall != null)
     {
         await InvokeFunction(arxivClient, functionCall, functionParams.ToString());
     }
+    
+    messageHistory.Add(new ChatRequestAssistantMessage(modelResponse.ToString()));
 
+    if (messageHistory.Count > 15)
+    {
+        messageHistory.RemoveAt(0);
+    }
+    
     Console.WriteLine();
 }
 
@@ -110,7 +137,8 @@ async Task InvokeFunction(ArxivClient client, string functionName, string functi
 {
     if (functionName == "FetchPapers")
     {
-        Console.WriteLine("Params: " + functionArguments);
+        Console.Write("Fetching papers!");
+        //Console.WriteLine("Params: " + functionArguments);
         var doc = JsonDocument.Parse(functionArguments);
         var root = doc.RootElement;
 
@@ -119,22 +147,35 @@ async Task InvokeFunction(ArxivClient client, string functionName, string functi
         var date = root.GetProperty("date").GetDateTime();
 
         var feed = await client.FetchPapers(searchQuery, date);
-        WriteOutItems(feed);
+        WriteOutItems(feed.Entries);
         return;
     }
     
     if (functionName == "SummarizePaper")
     {
-        Console.WriteLine("Params: " + functionArguments);
+        Console.Write("Summarizing paper!");
+        //Console.WriteLine("Params: " + functionArguments);
+        var doc = JsonDocument.Parse(functionArguments);
+        var root = doc.RootElement;
+        
+        var paperId = root.GetProperty("paperId").GetString();
+        var summary = await client.SummarizePaper(paperId);
+        
+        Console.WriteLine();
+        var panel = new Panel(summary)
+        {
+            Header = new PanelHeader("Summary")
+        };
+        AnsiConsole.Write(panel);
         return;
     }
     
     Console.WriteLine("Unknown function");
 }
 
-void WriteOutItems(Feed feed) 
+void WriteOutItems(List<Entry> entries) 
 {
-    if (feed.Entries.Count == 0) 
+    if (entries.Count == 0) 
     {
         Console.WriteLine("No items to show...");
         return;
@@ -145,14 +186,16 @@ void WriteOutItems(Feed feed)
         Border = TableBorder.HeavyHead
     };
 
+    table.AddColumn("Id");
     table.AddColumn("Updated");
     table.AddColumn("Title");
     table.AddColumn("Authors");
     table.AddColumn("Link");
 
-    foreach (var entry in feed.Entries)
+    foreach (var entry in entries)
     {
         table.AddRow(
+            $"{Markup.Escape(entry.Id)}", 
             $"{Markup.Escape(entry.Updated.ToString("yyyy-MM-dd HH:mm:ss"))}", 
             $"{Markup.Escape(entry.Title)}", 
             $"{Markup.Escape(string.Join(", ", entry.Authors.Select(x => x.Name).ToArray()))}",
@@ -181,9 +224,20 @@ class ArxivClient
         return feed;
     }
     
-    public async Task<string> SummarizePaper(string title, string paperAbstract)
+    public async Task<string> SummarizePaper(string paperId)
     {
-        var prompt = $"Title: {title}{Environment.NewLine}Abstract: {paperAbstract}";
+        var feed = await ArxivHelper.FetchArticleById(paperId);
+        if (feed == null || feed.Entries.Count == 0)
+        {
+            return "Paper not found";
+        }
+        
+        if (feed.Entries.Count > 1)
+        {
+            return "More than one match for this ID!";
+        }
+
+        var prompt = $"Title: {feed.Entries[0].Title}{Environment.NewLine}Abstract: {feed.Entries[0].Summary}";
         var systemPrompt = """
         You are a summarization engine for ArXiv papers. You will take in input in the form of paper title and abstract, and summarize them in a digestible 1-2 sentence format.
         Each summary should be a simple, plain text, separate paragraph.
