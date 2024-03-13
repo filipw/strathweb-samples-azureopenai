@@ -28,3 +28,9 @@ Various Azure Open AI Samples using the .NET SDK
  → Azure OpenAI summarization with Azure AI Speech speech synthesis\
  📝 [Blog post: Combining Azure OpenAI with Azure AI Speech](https://www.strathweb.com/2024/03/combining-azure-openai-with-azure-ai-speech/)\
  💻 [Code](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/)
+
+## Application orchestration using function calling
+
+→ using function calling to orchestrate application workflows\
+📝 Blog post - WIP
+💻 [Code](src/Strathweb.Samples.AzureOpenAI.FunctionCalling/)
