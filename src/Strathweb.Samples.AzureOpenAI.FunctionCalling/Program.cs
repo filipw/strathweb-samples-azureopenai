@@ -57,7 +57,7 @@ while (true)
     
     var request = new ChatCompletionsOptions(azureOpenAiDeploymentName, messageHistory)
     {
-        Temperature = 0.2f,
+        Temperature = 0,
         MaxTokens = 400,
         Functions =
         {
@@ -245,10 +245,9 @@ class ArxivClient
         var completionsOptions = new ChatCompletionsOptions
         {
             Temperature = 0,
-            NucleusSamplingFactor = 1,
             FrequencyPenalty = 0,
             PresencePenalty = 0,
-            MaxTokens = 1000,
+            MaxTokens = 400,
             DeploymentName = _azureOpenAiDeploymentName,
             Messages =
             {
