@@ -32,5 +32,5 @@ Various Azure Open AI Samples using the .NET SDK
 ## Function Calling
 
 → using function calling to orchestrate application workflows\
-📝 Blog post - WIP
+📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.FunctionCalling/)
