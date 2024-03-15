@@ -1,11 +1,17 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageVersion Include="Azure.AI.OpenAI" Version="1.0.0-beta.14" />
-        <PackageVersion Include="Microsoft.CognitiveServices.Speech" Version="1.36.0" />
-        <PackageVersion Include="System.Numerics.Tensors" Version="8.0.0" />
-        <PackageVersion Include="spectre.console" Version="0.48.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.AI.OpenAI" Version="1.0.0-beta.14" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="Microsoft.CognitiveServices.Speech" Version="1.36.0" />
+    <PackageVersion Include="System.Numerics.Tensors" Version="8.0.0" />
+    <PackageVersion Include="spectre.console" Version="0.48.0" />
+    <PackageVersion Include="AutoGen" Version="0.0.10" />
+    <PackageVersion Include="AutoGen.SourceGenerator" Version="0.0.10" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="System.CodeDom" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0" />
+  </ItemGroup>
 </Project>

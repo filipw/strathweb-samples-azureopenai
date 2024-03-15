@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.FunctionCalling", "src\Strathweb.Samples.AzureOpenAI.FunctionCalling\Strathweb.Samples.AzureOpenAI.FunctionCalling.csproj", "{55039E6E-F8C7-412A-AE54-31A72EFE4766}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling", "src\Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling\Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling.csproj", "{597381A9-0545-4BE2-BE30-71BC517A8A7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGen.SourceGenerator", "src\AutoGen.SourceGenerator\AutoGen.SourceGenerator.csproj", "{B01F8207-A854-4305-965F-D8B2207B3AB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +54,14 @@ Global
 		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55039E6E-F8C7-412A-AE54-31A72EFE4766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{597381A9-0545-4BE2-BE30-71BC517A8A7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{597381A9-0545-4BE2-BE30-71BC517A8A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{597381A9-0545-4BE2-BE30-71BC517A8A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{597381A9-0545-4BE2-BE30-71BC517A8A7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73D06A9F-932F-40E9-83E0-0B086A8787A8} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
@@ -58,5 +70,7 @@ Global
 		{AB4628DB-71E6-4583-98FB-383FDCB37D12} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{BF39E37A-5D86-404B-9C0E-1258F83235CE} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{55039E6E-F8C7-412A-AE54-31A72EFE4766} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
+		{597381A9-0545-4BE2-BE30-71BC517A8A7E} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
+		{B01F8207-A854-4305-965F-D8B2207B3AB9} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 	EndGlobalSection
 EndGlobal

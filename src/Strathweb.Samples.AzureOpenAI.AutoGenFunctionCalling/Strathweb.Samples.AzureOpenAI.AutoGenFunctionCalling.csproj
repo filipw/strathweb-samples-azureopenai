@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Strathweb.Samples.AzureOpenAI.AutoGenBasic</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoGen" />
+    <PackageReference Include="AutoGen.SourceGenerator" />
+    <PackageReference Include="spectre.console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Strathweb.Samples.AzureOpenAI.Shared\Strathweb.Samples.AzureOpenAI.Shared.csproj" />
+    <ProjectReference Include="..\AutoGen.SourceGenerator\AutoGen.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
