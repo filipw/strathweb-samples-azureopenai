@@ -27,11 +27,11 @@ var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint),
 
 var arxivClient = new ArxivClient(openAiClient, azureOpenAiDeploymentName);
 
-var gpt35Config = new AzureOpenAIConfig(azureOpenAiServiceEndpoint, azureOpenAiDeploymentName, azureOpenAiServiceKey);
+var gptConfig = new AzureOpenAIConfig(azureOpenAiServiceEndpoint, azureOpenAiDeploymentName, azureOpenAiServiceKey);
 var config = new ConversableAgentConfig
 {
     Temperature = 0,
-    ConfigList = new[] {gpt35Config},
+    ConfigList = new[] { gptConfig },
     FunctionContracts = new[]
     {
         arxivClient.FetchPapersFunctionContract,
@@ -49,17 +49,16 @@ var agent = new AssistantAgent(
     }
 );
 
-var response_sum = await agent.SendAsync("summarize paper 2312.14906");
-var summary = response_sum.GetContent();
+var responseSum = await agent.SendAsync("summarize paper 2312.14906");
+var summary = responseSum.GetContent();
 var panel = new Panel(summary)
 {
     Header = new PanelHeader("Summary")
 };
 AnsiConsole.Write(panel);
 
-var response_feed = await agent.SendAsync("fetch papers from December 13, 2023");
-// Console.WriteLine(response_feed.GetContent());
-var feedJson = response_feed.GetContent();
+var responseFeed = await agent.SendAsync("fetch papers from December 13, 2023");
+var feedJson = responseFeed.GetContent();
 var feed = JsonSerializer.Deserialize<Feed>(feedJson);
 WriteOutItems(feed.Entries);
 
@@ -110,7 +109,6 @@ public partial class ArxivClient
     /// <summary>
     /// Fetches quantum computing papers from ArXiv for a given date
     /// </summary>
-    /// <param name="searchQuery"></param>
     /// <param name="date"></param>
     [Function]
     public async Task<string> FetchPapers(DateTime date)
