@@ -25,26 +25,25 @@ var openAiClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint),
     new AzureKeyCredential(azureOpenAiServiceKey));
 
 var arxivClient = new ArxivClient(openAiClient, azureOpenAiDeploymentName);
-
 var gptConfig = new AzureOpenAIConfig(azureOpenAiServiceEndpoint, azureOpenAiDeploymentName, azureOpenAiServiceKey);
-var config = new ConversableAgentConfig
-{
-    Temperature = 0,
-    ConfigList = new[] { gptConfig },
-    FunctionContracts = new[]
-    {
-        arxivClient.FetchPapersFunctionContract,
-        arxivClient.SummarizePaperFunctionContract,
-    },
-};
 
 var assistantAgent = new AssistantAgent(
     name: "agent",
     systemMessage: systemInstructions,
-    llmConfig: config,
+    llmConfig: new ConversableAgentConfig
+    {
+        Temperature = 0,
+        ConfigList = new[] { gptConfig },
+        FunctionContracts = new[]
+        {
+            arxivClient.FetchPapersFunctionContract,
+            arxivClient.SummarizePaperFunctionContract,
+        },
+    },
     functionMap: new Dictionary<string, Func<string, Task<string>>>
     {
-        { "FetchPapers", arxivClient.FetchPapersWrapper }, { "SummarizePaper", arxivClient.SummarizePaperWrapper }
+        { "FetchPapers", arxivClient.FetchPapersWrapper }, 
+        { "SummarizePaper", arxivClient.SummarizePaperWrapper }
     }
 ).RegisterMiddleware(async (messages, options, agent, ct) =>
 {
@@ -57,17 +56,13 @@ var assistantAgent = new AssistantAgent(
         if (toolCall.FunctionName == "FetchPapers")
         {
             var feed = JsonSerializer.Deserialize<Feed>(content);
-            WriteOutItems(feed.Entries);
+            VisualizePapers(feed.Entries);
             return reply;
         }
         
         if (toolCall.FunctionName == "SummarizePaper")
         {
-            var panel = new Panel(content)
-            {
-                Header = new PanelHeader("Summary")
-            };
-            AnsiConsole.Write(panel);
+            VisualizeSummary(content);
             return reply;
         }
     }
@@ -84,7 +79,16 @@ await userProxyAgent.InitiateChatAsync(
     receiver: assistantAgent,
     maxRound: 10);
 
-void WriteOutItems(List<Entry> entries) 
+void VisualizeSummary(string content)
+{
+    var panel = new Panel(content)
+    {
+        Header = new PanelHeader("Summary")
+    };
+    AnsiConsole.Write(panel);
+}
+
+void VisualizePapers(List<Entry> entries) 
 {
     if (entries.Count == 0) 
     {
