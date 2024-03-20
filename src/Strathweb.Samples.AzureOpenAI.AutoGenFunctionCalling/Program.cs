@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using AutoGen;
 using AutoGen.Core;
 using AutoGen.OpenAI;
@@ -39,7 +38,7 @@ var config = new ConversableAgentConfig
     },
 };
 
-var agent = new AssistantAgent(
+var assistantAgent = new AssistantAgent(
     name: "agent",
     systemMessage: systemInstructions,
     llmConfig: config,
@@ -47,20 +46,43 @@ var agent = new AssistantAgent(
     {
         { "FetchPapers", arxivClient.FetchPapersWrapper }, { "SummarizePaper", arxivClient.SummarizePaperWrapper }
     }
-);
-
-var responseSum = await agent.SendAsync("summarize paper 2312.14906");
-var summary = responseSum.GetContent();
-var panel = new Panel(summary)
+).RegisterMiddleware(async (messages, options, agent, ct) =>
 {
-    Header = new PanelHeader("Summary")
-};
-AnsiConsole.Write(panel);
+    var reply = await agent.GenerateReplyAsync(messages, options, ct);
 
-var responseFeed = await agent.SendAsync("fetch papers from December 13, 2023");
-var feedJson = responseFeed.GetContent();
-var feed = JsonSerializer.Deserialize<Feed>(feedJson);
-WriteOutItems(feed.Entries);
+    var toolCall = reply.GetToolCalls()?.FirstOrDefault();
+    if (toolCall != null)
+    {
+        var content = reply.GetContent();
+        if (toolCall.FunctionName == "FetchPapers")
+        {
+            var feed = JsonSerializer.Deserialize<Feed>(content);
+            WriteOutItems(feed.Entries);
+            return reply;
+        }
+        
+        if (toolCall.FunctionName == "SummarizePaper")
+        {
+            var panel = new Panel(content)
+            {
+                Header = new PanelHeader("Summary")
+            };
+            AnsiConsole.Write(panel);
+            return reply;
+        }
+    }
+
+    return reply;
+});
+
+var userProxyAgent = new UserProxyAgent(
+        name: "user",
+        humanInputMode: HumanInputMode.ALWAYS)
+    .RegisterPrintFormatMessageHook();
+
+await userProxyAgent.InitiateChatAsync(
+    receiver: assistantAgent,
+    maxRound: 10);
 
 void WriteOutItems(List<Entry> entries) 
 {
@@ -164,10 +186,4 @@ public partial class ArxivClient
         var preferredChoice = completionsResponse.Value.Choices[0];
         return preferredChoice.Message.Content.Trim();
     }
-}
-
-public enum SearchQuery
-{
-    QuantumPhysics,
-    QuantumComputing
 }
