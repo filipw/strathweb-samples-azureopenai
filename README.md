@@ -34,3 +34,9 @@ Various Azure Open AI Samples using the .NET SDK
 → using function calling to orchestrate application workflows\
 📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.FunctionCalling/)
+
+## AutoGen Calling
+
+→ function calling with the [AutoGen](https://github.com/microsoft/autogen) framework\
+📝 Blog post - WIP\
+💻 [Code](src/Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling/)
