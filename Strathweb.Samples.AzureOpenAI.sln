@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGen.SourceGenerator", "src\AutoGen.SourceGenerator\AutoGen.SourceGenerator.csproj", "{B01F8207-A854-4305-965F-D8B2207B3AB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling", "src\Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling\Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling.csproj", "{FF224476-836A-4F8F-97F0-8108340A6E51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B01F8207-A854-4305-965F-D8B2207B3AB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF224476-836A-4F8F-97F0-8108340A6E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF224476-836A-4F8F-97F0-8108340A6E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF224476-836A-4F8F-97F0-8108340A6E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF224476-836A-4F8F-97F0-8108340A6E51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73D06A9F-932F-40E9-83E0-0B086A8787A8} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
@@ -72,5 +78,6 @@ Global
 		{55039E6E-F8C7-412A-AE54-31A72EFE4766} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{597381A9-0545-4BE2-BE30-71BC517A8A7E} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 		{B01F8207-A854-4305-965F-D8B2207B3AB9} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
+		{FF224476-836A-4F8F-97F0-8108340A6E51} = {04C26FD3-1402-442C-8D33-6D15E93A66D8}
 	EndGlobalSection
 EndGlobal
