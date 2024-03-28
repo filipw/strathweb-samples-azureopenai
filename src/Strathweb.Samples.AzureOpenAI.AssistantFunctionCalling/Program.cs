@@ -69,7 +69,7 @@ while (true)
         thread.Id,
         MessageRole.User,
         prompt);
-
+    
     var runResponse = await client.CreateRunAsync(thread, assistant);
 
     while (executionHelper.IsRunPending(runResponse))

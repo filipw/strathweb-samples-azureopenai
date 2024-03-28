@@ -49,7 +49,7 @@ public class ExecutionHelper
         => new()
         {
             new FunctionToolDefinition("FetchPapers",
-                "Fetches quantum physics or quantum computing papers from ArXiv for a given date",
+                "Fetches papers from ArXiv for a given date (required). The searchQuery parameter is mandatory and controls whether the papers are quantum physics or quantum computing.",
                 BinaryData.FromObjectAsJson(new
                 {
                     type = "object",
