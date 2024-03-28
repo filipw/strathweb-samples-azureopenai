@@ -35,8 +35,14 @@ Various Azure Open AI Samples using the .NET SDK
 📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.FunctionCalling/)
 
-## AutoGen Calling
+## AutoGen Function Calling
 
 → function calling with the [AutoGen](https://github.com/microsoft/autogen) framework\
 📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling/)
+
+## Assistant Function Calling
+
+→ function calling with the Assistants API\
+📝 Blog post - WIP\
+💻 [Code](src/Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling/)
