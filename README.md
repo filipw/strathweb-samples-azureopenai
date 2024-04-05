@@ -29,20 +29,21 @@ Various Azure Open AI Samples using the .NET SDK
  📝 [Blog post: Combining Azure OpenAI with Azure AI Speech](https://www.strathweb.com/2024/03/combining-azure-openai-with-azure-ai-speech/)\
  💻 [Code](src/Strathweb.Samples.AzureOpenAI.SpeechSynthesis/)
 
-## Function Calling
+## Tool Calling
 
-→ using function calling to orchestrate application workflows\
-📝 Blog post - WIP\
+→ using tool (function) calling to orchestrate application workflows\
+📝 [Blog post: Tool Calling with Azure OpenAI - Part 1: The Basics](https://www.strathweb.com/2024/04/function-calling-with-azure-openai-part-1/)\
+📝 Blog post: Part 2 - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.FunctionCalling/)
 
-## AutoGen Function Calling
+## AutoGen Tool Calling
 
-→ function calling with the [AutoGen](https://github.com/microsoft/autogen) framework\
+→ tool (function) calling with the [AutoGen](https://github.com/microsoft/autogen) framework\
 📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.AutoGenFunctionCalling/)
 
-## Assistant Function Calling
+## Assistant Tool Calling
 
-→ function calling with the [Assistants API](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/assistants)\
+→ tool (function) calling with the [Assistants API](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/assistants)\
 📝 Blog post - WIP\
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling/)
