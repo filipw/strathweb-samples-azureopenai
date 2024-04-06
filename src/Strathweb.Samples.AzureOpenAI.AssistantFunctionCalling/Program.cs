@@ -49,7 +49,7 @@ var assistantCreationOptions = new AssistantCreationOptions(azureOpenAiDeploymen
 {
     Name = "Arxiv Helper Assistant", Instructions = systemInstructions
 };
-foreach (var tool in executionHelper.GetAVailableFunctions())
+foreach (var tool in executionHelper.GetAvailableFunctions())
 {
     assistantCreationOptions.Tools.Add(tool);
 }
@@ -79,7 +79,7 @@ while (true)
 
         if (executionHelper.RequiresAction(runResponse, out var submitToolOutputsAction))
         {
-            var toolOutputs = await executionHelper.ProcessToolCalls(arxivClient, submitToolOutputsAction);
+            var toolOutputs = await executionHelper.ProcessToolCalls(submitToolOutputsAction);
             runResponse = await client.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
         }
     }

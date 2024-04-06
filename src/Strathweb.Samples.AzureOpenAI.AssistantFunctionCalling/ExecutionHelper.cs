@@ -45,7 +45,7 @@ public class ExecutionHelper
         return null;
     }
     
-    public List<ToolDefinition> GetAVailableFunctions() 
+    public List<ToolDefinition> GetAvailableFunctions() 
         => new()
         {
             new FunctionToolDefinition("FetchPapers",
@@ -88,8 +88,7 @@ public class ExecutionHelper
         return false;
     }
 
-    public async Task<List<ToolOutput>> ProcessToolCalls(ArxivClient arxivClient,
-        SubmitToolOutputsAction submitToolOutputsAction)
+    public async Task<List<ToolOutput>> ProcessToolCalls(SubmitToolOutputsAction submitToolOutputsAction)
     {
         var toolOutputs = new List<ToolOutput>();
         foreach (var toolCall in submitToolOutputsAction.ToolCalls)
