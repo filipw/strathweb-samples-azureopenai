@@ -131,7 +131,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
                 {
                     Description =
                         "Fetches quantum physics or quantum computing papers from ArXiv for a given date",
-                    Name = "FetchPapers",
+                    Name = nameof(ArxivClient.FetchPapers),
                     Parameters = BinaryData.FromObjectAsJson(new
                     {
                         type = "object",
@@ -151,7 +151,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
                 new FunctionDefinition
                 {
                     Description = "Summarizes a given paper based on the ArXiv ID of the paper.",
-                    Name = "SummarizePaper",
+                    Name = nameof(ArxivClient.SummarizePaper),
                     Parameters = BinaryData.FromObjectAsJson(new
                     {
                         type = "object",
@@ -165,7 +165,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
         {
             try
             {
-                if (functionName == "FetchPapers")
+                if (functionName == nameof(ArxivClient.FetchPapers))
                 {
                     var doc = JsonDocument.Parse(functionArguments);
                     var root = doc.RootElement;
@@ -179,7 +179,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
                     return true;
                 }
 
-                if (functionName == "SummarizePaper")
+                if (functionName == nameof(ArxivClient.SummarizePaper))
                 {
                     var doc = JsonDocument.Parse(functionArguments);
                     var root = doc.RootElement;
