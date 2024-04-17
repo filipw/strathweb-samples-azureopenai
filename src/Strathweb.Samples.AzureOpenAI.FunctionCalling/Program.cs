@@ -14,6 +14,25 @@ var azureOpenAiServiceKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API
 var azureOpenAiDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ??
                                 throw new Exception("AZURE_OPENAI_DEPLOYMENT_NAME missing");
 
+var demo = AnsiConsole.Prompt(
+    new SelectionPrompt<string>()
+        .Title("Choose the [green]example[/] to run?")
+        .AddChoices("Arxiv Assistant", "Concert Booking"));
+
+switch (demo)
+{
+    case "Arxiv Assistant":
+        // runs the sample below
+        break;
+    case "Concert Booking":
+        await Demo.RunBookingDemo(azureOpenAiServiceEndpoint, azureOpenAiServiceKey, azureOpenAiDeploymentName);
+        break;
+    default:
+        Console.WriteLine("Nothing selected!");
+        Environment.Exit(0);
+        break;
+}
+
 var systemInstructions = $"""
 You are an AI assistant designed to support users in navigating the ArXiv browser application, focusing on functions related to quantum physics and quantum computing research. 
 The application features specific functions that allow users to fetch papers and summarize them based on precise criteria. Adhere to the following rules rigorously:
