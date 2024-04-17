@@ -9,9 +9,9 @@ using Spectre.Console;
 
 namespace Strathweb.Samples.AzureOpenAI.FunctionCalling;
 
-static partial class Demo
+static class BookingSample
 {
-    public static async Task RunBookingDemo(string azureOpenAiServiceEndpoint, string azureOpenAiServiceKey,
+    public static async Task Run(string azureOpenAiServiceEndpoint, string azureOpenAiServiceKey,
         string azureOpenAiDeploymentName)
     {
 
@@ -123,6 +123,90 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
             Console.WriteLine();
         }
     }
+
+    private class ExecutionHelper
+    {
+        private readonly ConcertApi _concertApi;
+
+        public ExecutionHelper(ConcertApi concertApi)
+        {
+            _concertApi = concertApi;
+        }
+
+        public List<FunctionDefinition> GetAvailableFunctions()
+            => new()
+            {
+                new FunctionDefinition
+                {
+                    Description =
+                        "Searches for concerts by a specific band name and location. Returns a list of concerts, each one with its ID, date, band, location, ticket prices and currency.",
+                    Name = nameof(ConcertApi.SearchConcerts),
+                    Parameters = BinaryData.FromObjectAsJson(new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            band = new { type = "string" },
+                            location = new
+                            {
+                                type = "string",
+                                @enum = new[] { "Zurich", "Basel", "Toronto", "NewYork" }
+                            },
+                        },
+                        required = new[] { "band", "location" }
+                    })
+                },
+                new FunctionDefinition
+                {
+                    Description = "Books a concert ticket to a concert, using the concert's ID.",
+                    Name = nameof(ConcertApi.BookTicket),
+                    Parameters = BinaryData.FromObjectAsJson(new
+                    {
+                        type = "object",
+                        properties = new { id = new { type = "integer" }, },
+                        required = new[] { "id" }
+                    })
+                }
+            };
+
+        public async Task<ToolResult> InvokeFunction(string functionName, string functionArguments)
+        {
+            //Console.WriteLine(functionName + " > " + functionArguments);
+            try
+            {
+                if (functionName == nameof(ConcertApi.SearchConcerts))
+                {
+                    var doc = JsonDocument.Parse(functionArguments);
+                    var root = doc.RootElement;
+
+                    var locationString = root.GetProperty("location").GetString();
+                    var location = Enum.Parse<Location>(locationString);
+                    var band = root.GetProperty("band").GetString();
+
+                    var result = await _concertApi.SearchConcerts(band, location);
+                    return new ToolResult(result, true);
+                }
+
+                if (functionName == nameof(ConcertApi.BookTicket))
+                {
+                    var doc = JsonDocument.Parse(functionArguments);
+                    var root = doc.RootElement;
+
+                    var id = root.GetProperty("id").GetUInt32();
+                    await _concertApi.BookTicket(id);
+
+                    return new ToolResult("Success!");
+                }
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.WriteException(e);
+                // in case of any error, send back to user in error state
+            }
+
+            return new ToolResult(null, IsError: true);
+        }
+    }
 }
 
 public enum Location
@@ -163,87 +247,5 @@ public class ConcertApi
 }
 
 public record Concert(uint Id, DateTime TimeStamp, string Band, Location Location, double Price, string Currency);
-
-public class ExecutionHelper
-{
-    private readonly ConcertApi _concertApi;
-
-    public ExecutionHelper(ConcertApi concertApi)
-    {
-        _concertApi = concertApi;
-    }
-    
-    public List<FunctionDefinition> GetAvailableFunctions() 
-        => new()
-        {
-            new FunctionDefinition
-            {
-                Description = "Searches for concerts by a specific band name and location. Returns a list of concerts, each one with its ID, date, band, location, ticket prices and currency.",
-                Name = nameof(ConcertApi.SearchConcerts),
-                Parameters = BinaryData.FromObjectAsJson(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        band = new { type = "string" },
-                        location = new { type = "string", @enum = new[] { "Zurich", "Basel", "Toronto", "NewYork" } },
-                    },
-                    required = new[] { "band", "location" }
-                })
-            },
-            new FunctionDefinition
-            {
-                Description = "Books a concert ticket to a concert, using the concert's ID.",
-                Name = nameof(ConcertApi.BookTicket),
-                Parameters = BinaryData.FromObjectAsJson(new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        id = new { type = "integer" },
-                    },
-                    required = new[] { "id" }
-                })
-            }
-        };
-
-    public async Task<ToolResult> InvokeFunction(string functionName, string functionArguments)
-    {
-        //Console.WriteLine(functionName + " > " + functionArguments);
-        try
-        {
-            if (functionName == nameof(ConcertApi.SearchConcerts))
-            {
-                var doc = JsonDocument.Parse(functionArguments);
-                var root = doc.RootElement;
-
-                var locationString = root.GetProperty("location").GetString();
-                var location = Enum.Parse<Location>(locationString);
-                var band = root.GetProperty("band").GetString();
-
-                var result = await _concertApi.SearchConcerts(band, location);
-                return new ToolResult(result, true);
-            }
-
-            if (functionName == nameof(ConcertApi.BookTicket))
-            {
-                var doc = JsonDocument.Parse(functionArguments);
-                var root = doc.RootElement;
-
-                var id = root.GetProperty("id").GetUInt32();
-                await _concertApi.BookTicket(id);
-
-                return new ToolResult("Success!");
-            }
-        }
-        catch (Exception e)
-        {
-            AnsiConsole.WriteException(e);
-            // in case of any error, send back to user in error state
-        }
-
-        return new ToolResult(null, IsError: true);
-    }
-}
 
 public record ToolResult(string Output, bool BackToModel = false, bool IsError = false);
