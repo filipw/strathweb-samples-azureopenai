@@ -66,25 +66,35 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
             
             foreach (var function in executionHelper.GetAvailableFunctions())
             {
-                request.Functions.Add(function);
+                request.Tools.Add(new ChatCompletionsFunctionToolDefinition(function));
             }
 
             var completionResponse = await openAiClient.GetChatCompletionsStreamingAsync(request);
-            var functionParams = new StringBuilder();
-            var modelResponse = new StringBuilder();
 
-            string functionCall = null;
             AnsiConsole.Markup(":robot: ");
+            
+            var modelResponse = new StringBuilder();
+            var functionNames = new Dictionary<int, string>();
+            var functionArguments = new Dictionary<int, StringBuilder>();
             await foreach (var message in completionResponse)
             {
-                if (!string.IsNullOrWhiteSpace(message.FunctionName))
+                if (message.ToolCallUpdate is StreamingFunctionToolCallUpdate functionToolCallUpdate)
                 {
-                    functionCall = message.FunctionName;
-                }
+                    if (functionToolCallUpdate.Name != null)
+                    {
+                        functionNames[functionToolCallUpdate.ToolCallIndex] = functionToolCallUpdate.Name;
+                    }
+                    
+                    if (functionToolCallUpdate.ArgumentsUpdate != null)
+                    {
+                        if (!functionArguments.TryGetValue(functionToolCallUpdate.ToolCallIndex, out var argumentsBuilder))
+                        {
+                            argumentsBuilder = new StringBuilder();
+                            functionArguments[functionToolCallUpdate.ToolCallIndex] = argumentsBuilder;
+                        }
 
-                if (message.FunctionArgumentsUpdate != null)
-                {
-                    functionParams.Append(message.FunctionArgumentsUpdate);
+                        argumentsBuilder.Append(functionToolCallUpdate.ArgumentsUpdate);
+                    }
                 }
 
                 if (message.ContentUpdate != null)
@@ -100,10 +110,14 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
                 messageHistory.Add(new ChatRequestAssistantMessage(modelResponseText));
             }
 
-            if (functionCall != null)
+            // call the first tool that was found
+            // in more sophisticated scenarios we may want to call multiple tools or let the user select one
+            var functionCall = functionNames.FirstOrDefault().Value;
+            var functionArgs = functionArguments.FirstOrDefault().Value?.ToString();
+            if (functionCall != null && functionArgs != null)
             {
-                AnsiConsole.WriteLine($"I'm calling a function called {functionCall}... Stay tuned...");
-                var functionResult = await executionHelper.InvokeFunction(functionCall, functionParams.ToString());
+                AnsiConsole.WriteLine($"I'm calling a function called {functionCall} with arguments {functionArgs}... Stay tuned...");
+                var functionResult = await executionHelper.InvokeFunction(functionCall, functionArgs);
                 if (functionResult.BackToModel)
                 {
                     prompt = functionResult.Output;
@@ -171,7 +185,6 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
 
         public async Task<ToolResult> InvokeFunction(string functionName, string functionArguments)
         {
-            //Console.WriteLine(functionName + " > " + functionArguments);
             try
             {
                 if (functionName == nameof(ConcertApi.SearchConcerts))
