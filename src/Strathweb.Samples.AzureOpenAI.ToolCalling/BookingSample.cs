@@ -47,16 +47,15 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
         
         var messageHistory = new List<ChatRequestMessage> { new ChatRequestSystemMessage(systemInstructions), new ChatRequestAssistantMessage(introMessage) };
 
-        string prompt = null;
+        var skipUserPrompt = false;
         while (true)
         {
-            if (prompt == null)
+            if (!skipUserPrompt)
             {
                 Console.Write("> ");
-                prompt = Console.ReadLine();
+                var prompt = Console.ReadLine();
+                messageHistory.Add(new ChatRequestUserMessage(prompt));
             }
-
-            messageHistory.Add(new ChatRequestUserMessage(prompt));
 
             var request = new ChatCompletionsOptions(azureOpenAiDeploymentName, messageHistory)
             {
@@ -105,10 +104,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
             }
 
             var modelResponseText = modelResponse.ToString();
-            if (!string.IsNullOrEmpty(modelResponseText))
-            {
-                messageHistory.Add(new ChatRequestAssistantMessage(modelResponseText));
-            }
+            var assistantResponse = new ChatRequestAssistantMessage(modelResponseText);
 
             // call the first tool that was found
             // in more sophisticated scenarios we may want to call multiple tools or let the user select one
@@ -116,24 +112,32 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
             var functionArgs = functionArguments.FirstOrDefault().Value?.ToString();
             if (functionCall != null && functionArgs != null)
             {
+                var toolCallId = Guid.NewGuid().ToString();
+                assistantResponse.ToolCalls.Add(new ChatCompletionsFunctionToolCall(toolCallId, functionCall, functionArgs));
                 AnsiConsole.WriteLine($"I'm calling a function called {functionCall} with arguments {functionArgs}... Stay tuned...");
                 var functionResult = await executionHelper.InvokeFunction(functionCall, functionArgs);
+                
+                // if the function requires us to go back to the model
+                // we will add the tool output to the chat history
                 if (functionResult.BackToModel)
                 {
-                    prompt = functionResult.Output;
-                    messageHistory.Add(new ChatRequestFunctionMessage(functionCall, modelResponseText));
+                    var toolOutput = new ChatRequestToolMessage(functionResult.Output, toolCallId);
+                    messageHistory.Add(assistantResponse);
+                    messageHistory.Add(toolOutput);
+                    skipUserPrompt = true;
                     continue;
                 }
 
+                // if the function does not require us to go back to the model, simply display any output
+                // we do not need to show the model the function output anymore
                 if (functionResult.Output != null)
                 {
                     Console.WriteLine(functionResult.Output);
-                    prompt = null;
-                    continue;
                 }
             }
 
-            prompt = null;
+            messageHistory.Add(assistantResponse);
+            skipUserPrompt = false;
             Console.WriteLine();
         }
     }
