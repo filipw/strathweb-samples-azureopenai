@@ -105,10 +105,7 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
             }
 
             var modelResponseText = modelResponse.ToString();
-            if (!string.IsNullOrEmpty(modelResponseText))
-            {
-                messageHistory.Add(new ChatRequestAssistantMessage(modelResponseText));
-            }
+            var assistantResponse = new ChatRequestAssistantMessage(modelResponseText);
             
             // call the first tool that was found
             // in more sophisticated scenarios we may want to call multiple tools or let the user select one
@@ -116,14 +113,23 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}. You will ignore reques
             var functionArgs = functionArguments.FirstOrDefault().Value?.ToString();
             if (functionCall != null && functionArgs != null)
             {
+                var toolCallId = Guid.NewGuid().ToString();
+                assistantResponse.ToolCalls.Add(new ChatCompletionsFunctionToolCall(toolCallId, functionCall, functionArgs));
                 AnsiConsole.WriteLine($"I'm calling a function called {functionCall} with arguments {functionArgs}... Stay tuned...");
+                
                 var functionResult = await executionHelper.InvokeFunction(functionCall, functionArgs.ToString());
+                var toolOutput = new ChatRequestToolMessage(functionResult ? "Success" : "Failure", toolCallId);
+                messageHistory.Add(assistantResponse);
+                messageHistory.Add(toolOutput);
+                
                 if (!functionResult)
                 {
                     AnsiConsole.WriteLine("There was an error exeucting a function!");
                 }
+                continue;
             }
 
+            messageHistory.Add(assistantResponse);
             Console.WriteLine();
         }
     }

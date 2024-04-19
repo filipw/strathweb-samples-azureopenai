@@ -117,23 +117,20 @@ Tomorrow will be {DateTime.Now.AddDays(1).ToString("D")}.
                 AnsiConsole.WriteLine($"I'm calling a function called {functionCall} with arguments {functionArgs}... Stay tuned...");
                 var functionResult = await executionHelper.InvokeFunction(functionCall, functionArgs);
                 
-                // if the function requires us to go back to the model
-                // we will add the tool output to the chat history
+                var toolOutput = new ChatRequestToolMessage(functionResult.Output, toolCallId);
+                messageHistory.Add(assistantResponse);
+                messageHistory.Add(toolOutput);
+                
                 if (functionResult.BackToModel)
                 {
-                    var toolOutput = new ChatRequestToolMessage(functionResult.Output, toolCallId);
-                    messageHistory.Add(assistantResponse);
-                    messageHistory.Add(toolOutput);
                     skipUserPrompt = true;
-                    continue;
                 }
-
-                // if the function does not require us to go back to the model, simply display any output
-                // we do not need to show the model the function output anymore
-                if (functionResult.Output != null)
+                else
                 {
                     Console.WriteLine(functionResult.Output);
                 }
+
+                continue;
             }
 
             messageHistory.Add(assistantResponse);
