@@ -8,7 +8,7 @@ using Azure.AI.OpenAI;
 using Spectre.Console;
 using Strathweb.Samples.AzureOpenAI.Shared;
 
-namespace Strathweb.Samples.AzureOpenAI.FunctionCalling;
+namespace Strathweb.Samples.AzureOpenAI.ToolCalling;
 
 static class ArxivSample
 {

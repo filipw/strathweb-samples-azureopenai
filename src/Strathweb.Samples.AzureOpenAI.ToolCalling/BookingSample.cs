@@ -7,7 +7,7 @@ using Azure;
 using Azure.AI.OpenAI;
 using Spectre.Console;
 
-namespace Strathweb.Samples.AzureOpenAI.FunctionCalling;
+namespace Strathweb.Samples.AzureOpenAI.ToolCalling;
 
 static class BookingSample
 {

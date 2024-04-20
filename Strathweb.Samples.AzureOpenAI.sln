@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGen.SourceGenerator", "src\AutoGen.SourceGenerator\AutoGen.SourceGenerator.csproj", "{B01F8207-A854-4305-965F-D8B2207B3AB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling", "src\Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling\Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling.csproj", "{FF224476-836A-4F8F-97F0-8108340A6E51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strathweb.Samples.AzureOpenAI.AssistantToolCalling", "src\Strathweb.Samples.AzureOpenAI.AssistantToolCalling\Strathweb.Samples.AzureOpenAI.AssistantToolCalling.csproj", "{FF224476-836A-4F8F-97F0-8108340A6E51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

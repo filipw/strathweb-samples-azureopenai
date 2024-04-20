@@ -1,9 +1,5 @@
-﻿using System.Text;
-using System.Text.Json;
-using Azure;
-using Azure.AI.OpenAI;
-using Spectre.Console;
-using Strathweb.Samples.AzureOpenAI.FunctionCalling;
+﻿using Spectre.Console;
+using Strathweb.Samples.AzureOpenAI.ToolCalling;
 
 var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
                                  throw new Exception("AZURE_OPENAI_SERVICE_ENDPOINT missing");

@@ -5,7 +5,7 @@ using System.Text.Json;
 using Azure;
 using Azure.AI.OpenAI.Assistants;
 
-namespace Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling;
+namespace Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
 
 public class ExecutionHelper
 {

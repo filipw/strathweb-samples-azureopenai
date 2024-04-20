@@ -1,7 +1,7 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Azure.AI.OpenAI.Assistants;
-using Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling;
+using Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
 
 var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
                                  throw new Exception("AZURE_OPENAI_SERVICE_ENDPOINT missing");

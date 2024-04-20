@@ -4,7 +4,7 @@
 using Azure.AI.OpenAI;
 using Strathweb.Samples.AzureOpenAI.Shared;
 
-namespace Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling;
+namespace Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
 
 public class ArxivClient
 {
