@@ -33,7 +33,7 @@ Various Azure Open AI Samples using the .NET SDK
 
 → using tool (function) calling to orchestrate application workflows\
 📝 [Blog post: Tool Calling with Azure OpenAI - Part 1: The Basics](https://www.strathweb.com/2024/04/function-calling-with-azure-openai-part-1/)\
-📝 Blog post: Part 2 - WIP\
+📝 [Blog post: Tool Calling with Azure OpenAI - Part 2: Using the tools directly via the SDK](https://www.strathweb.com/2024/04/function-calling-with-azure-openai-part-2/)
 💻 [Code](src/Strathweb.Samples.AzureOpenAI.ToolCalling/)
 
 ## AutoGen Tool Calling
