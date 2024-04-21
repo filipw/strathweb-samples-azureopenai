@@ -46,4 +46,4 @@ Various Azure Open AI Samples using the .NET SDK
 
 → tool (function) calling with the [Assistants API](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/assistants)\
 📝 Blog post - WIP\
-💻 [Code](src/Strathweb.Samples.AzureOpenAI.AssistantFunctionCalling/)
+💻 [Code](src/Strathweb.Samples.AzureOpenAI.AssistantToolCalling/)
