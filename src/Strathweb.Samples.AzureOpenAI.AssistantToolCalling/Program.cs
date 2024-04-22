@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
 
 var azureOpenAiServiceEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_SERVICE_ENDPOINT") ??
                                  throw new Exception("AZURE_OPENAI_SERVICE_ENDPOINT missing");
@@ -19,9 +20,9 @@ switch (demo)
     case "Arxiv Assistant":
         await ArxivSample.Run(azureOpenAiServiceEndpoint, azureOpenAiServiceKey, azureOpenAiDeploymentName);
         break;
-    // case "Concert Booking":
-    //     await BookingSample.Run(azureOpenAiServiceEndpoint, azureOpenAiServiceKey, azureOpenAiDeploymentName);
-    //     break;
+    case "Concert Booking":
+        await BookingSample.Run(azureOpenAiServiceEndpoint, azureOpenAiServiceKey, azureOpenAiDeploymentName);
+        break;
     default:
         Console.WriteLine("Nothing selected!");
         Environment.Exit(0);

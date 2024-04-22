@@ -4,6 +4,8 @@ using Azure.AI.OpenAI;
 using Azure.AI.OpenAI.Assistants;
 using Strathweb.Samples.AzureOpenAI.Shared;
 
+namespace Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
+
 static class ArxivSample
 {
     public static async Task Run(string azureOpenAiServiceEndpoint, string azureOpenAiServiceKey,
