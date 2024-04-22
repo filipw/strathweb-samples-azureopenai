@@ -3,8 +3,4 @@
 
 namespace Strathweb.Samples.AzureOpenAI.AssistantToolCalling;
 
-public enum SearchQuery
-{
-    QuantumPhysics,
-    QuantumComputing
-}
+
